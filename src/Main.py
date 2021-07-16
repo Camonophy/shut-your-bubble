@@ -20,7 +20,9 @@ if __name__ == "__main__":
 
     # Create a Qt Window
     gui = GUI()
+    
+    #Run the Qt-GUI
     gui.show()
 
-    # Run the Qt-GUI  
+
     sys.exit(app.exec_())
