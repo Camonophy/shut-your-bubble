@@ -1,0 +1,6 @@
+# Untrack folders
+example/
+
+# Untrack files
+*.png
+*.jpg
