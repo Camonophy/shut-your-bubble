@@ -1,28 +1,21 @@
 import sys
 
-from PyQt5 import QtWidgets
+from PyQt5         import QtWidgets
+from GUI           import GUI
+from Textinguisher import *
 
-class GUI(QtWidgets.QMainWindow):
-    def __init__(self):
-        super(GUI, self).__init__()
-        
-        # Main window
-        self.setGeometry(200, 200, 800, 800)
-        self.setWindowTitle("Shut Your Bubble")
-        self.resize(900, 500)
+PATH = 'example/FEheroes.jpg'
+X, Y, W, H = 550, 123, 446, 49
 
+remove_section(PATH, X, Y, W, H)
 
-
-if __name__ == "__main__":
-
-    # Create the Qt Application
-    app = QtWidgets.QApplication(sys.argv)
-
-    # Create a Qt Window
-    gui = GUI()
-    
-    #Run the Qt-GUI
-    gui.show()
-
-
-    sys.exit(app.exec_())
+# Create the Qt Application
+#app = QtWidgets.QApplication(sys.argv)
+#
+## Create a Qt Window
+#gui = GUI()
+#    
+##Run the Qt-GUI
+#gui.show()
+#
+#sys.exit(app.exec_())
