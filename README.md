@@ -18,6 +18,9 @@ First, install Tesseract's english language package, so the program is able to r
 
    > sudo pacman -Syu && sudo pacman -S tesseract-data-eng
  
+### Windows
+  
+   Use the Tesseract Windows installation from <a href="https://github.com/UB-Mannheim/tesseract/wiki">this repository</a>
  
  Next, simply run: 
  
