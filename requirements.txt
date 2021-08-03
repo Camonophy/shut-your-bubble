@@ -1,5 +1,6 @@
 # Python packages here
 
+opencv-python==4.5.3.56
 PyQt5==5.15.4
 pytesseract==0.3.8
 tesseract==0.1.3
