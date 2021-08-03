@@ -1,7 +1,3 @@
-# install pytesseract
-# install tesseract
-# install tesseract-data-eng / tesseract-ocr-eng
-
 import cv2
 import pytesseract 
 from PIL import ImageDraw, Image
