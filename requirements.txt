@@ -1,5 +1,5 @@
 # Python packages here
 
-PyQt5=5.15.4
+PyQt5==5.15.4
 pytesseract==0.3.8
 tesseract==0.1.3
