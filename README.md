@@ -21,13 +21,14 @@ First, install Tesseract's english language package, so the program is able to r
 ### Windows
   
    Use the Tesseract Windows installation from <a href="https://github.com/UB-Mannheim/tesseract/wiki">this repository</a>
- 
- Next, simply run: 
+
+#### Python
+ After installing Tesseract on your machine, simply run:  
  
  > pip3 install -r requirements.txt
  
- to gather all packages that you need.  
- 
+ to gather the required packages from the official Python Package Index. 
+
   
 ## Options: 
 
