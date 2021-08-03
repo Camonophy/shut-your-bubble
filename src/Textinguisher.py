@@ -1,13 +1,14 @@
 import cv2
 import pytesseract 
-from PIL import ImageDraw, Image
+import os
+
+from PIL         import ImageDraw, Image
 from pytesseract import Output
 
 from PIL import Image
 
 # Insert public functions here
 __all__ = ["remove_section"]
-
 
 '''
     Open an image and remove the text within the area of the
@@ -19,6 +20,11 @@ __all__ = ["remove_section"]
                       relevant to the top left corner
 '''
 def remove_section(image_path, x, y, w, h):
+
+    # Default Tesseract system path for Windows machines
+    if os.name == 'nt':
+        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
+
     binary_image  = load_binary_image(image_path)
     image_section = get_image_section(binary_image, x, y, w, h)
     data          = pytesseract.image_to_data(image_section, lang='eng', output_type=Output.DICT)
