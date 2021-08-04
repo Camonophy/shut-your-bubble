@@ -1,6 +1,8 @@
 # Untrack folders
 example/
 gui/.vs/
+gui/gui/bin/
+gui/gui/obj/
 
 # Untrack files
 *.png
