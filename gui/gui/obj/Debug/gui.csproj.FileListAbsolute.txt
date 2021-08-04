@@ -1,0 +1,10 @@
+F:\shut-your-bubble\gui\gui\bin\Debug\gui.exe.config
+F:\shut-your-bubble\gui\gui\bin\Debug\gui.exe
+F:\shut-your-bubble\gui\gui\bin\Debug\gui.pdb
+F:\shut-your-bubble\gui\gui\obj\Debug\gui.csproj.AssemblyReference.cache
+F:\shut-your-bubble\gui\gui\obj\Debug\gui.MainWindow.resources
+F:\shut-your-bubble\gui\gui\obj\Debug\gui.Properties.Resources.resources
+F:\shut-your-bubble\gui\gui\obj\Debug\gui.csproj.GenerateResource.cache
+F:\shut-your-bubble\gui\gui\obj\Debug\gui.csproj.CoreCompileInputs.cache
+F:\shut-your-bubble\gui\gui\obj\Debug\gui.exe
+F:\shut-your-bubble\gui\gui\obj\Debug\gui.pdb
