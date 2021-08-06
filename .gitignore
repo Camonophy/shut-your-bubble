@@ -3,7 +3,7 @@ example/
 gui/.vs/
 gui/gui/bin/
 gui/gui/obj/
-gui/gui/Resource/Backup
+gui/gui/Resources/Backup/
 
 # Untrack files
 *.png
