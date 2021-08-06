@@ -65,7 +65,6 @@ namespace gui
             this.ImageBox.Size = new System.Drawing.Size(865, 640);
             this.ImageBox.TabIndex = 0;
             this.ImageBox.TabStop = false;
-            this.ImageBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImageBox_DragDrop);
             this.ImageBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ImageBox_MouseDown);
             this.ImageBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ImageBox_MouseMove);
             this.ImageBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ImageBox_MouseUp);
@@ -80,7 +79,7 @@ namespace gui
             this.LoadButton.TabIndex = 1;
             this.LoadButton.Text = "Load";
             this.LoadButton.UseVisualStyleBackColor = false;
-            this.LoadButton.Click += new System.EventHandler(this.button1_Click);
+            this.LoadButton.Click += new System.EventHandler(this.load_Click);
             // 
             // PathBox
             // 
@@ -91,6 +90,7 @@ namespace gui
             this.PathBox.ReadOnly = true;
             this.PathBox.Size = new System.Drawing.Size(276, 23);
             this.PathBox.TabIndex = 2;
+            this.PathBox.Text = "C:";
             // 
             // LanguageSelect
             // 
@@ -102,7 +102,6 @@ namespace gui
             this.LanguageSelect.Name = "LanguageSelect";
             this.LanguageSelect.Size = new System.Drawing.Size(274, 24);
             this.LanguageSelect.TabIndex = 3;
-            this.LanguageSelect.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // SaveButton
             // 
@@ -114,32 +113,33 @@ namespace gui
             this.SaveButton.TabIndex = 4;
             this.SaveButton.Text = "Save";
             this.SaveButton.UseVisualStyleBackColor = false;
-            this.SaveButton.Click += new System.EventHandler(this.button1_Click_1);
+            this.SaveButton.Click += new System.EventHandler(this.SaveButton_Click);
             // 
             // BackButton
             // 
             this.BackButton.BackColor = System.Drawing.Color.White;
             this.BackButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BackButton.Image = global::gui.Properties.Resources.back;
+            this.BackButton.Image = global::gui.Properties.Resources.Back;
             this.BackButton.Location = new System.Drawing.Point(876, 6);
             this.BackButton.Name = "BackButton";
             this.BackButton.Size = new System.Drawing.Size(36, 30);
             this.BackButton.TabIndex = 5;
             this.BackButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.BackButton.UseVisualStyleBackColor = false;
-            this.BackButton.Click += new System.EventHandler(this.button2_Click);
+            this.BackButton.Click += new System.EventHandler(this.backButton_Click);
             // 
             // ForthButton
             // 
             this.ForthButton.BackColor = System.Drawing.Color.White;
             this.ForthButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.ForthButton.Image = global::gui.Properties.Resources.arrow;
+            this.ForthButton.Image = global::gui.Properties.Resources.Forth;
             this.ForthButton.Location = new System.Drawing.Point(928, 6);
             this.ForthButton.Name = "ForthButton";
             this.ForthButton.Size = new System.Drawing.Size(36, 30);
             this.ForthButton.TabIndex = 6;
             this.ForthButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.ForthButton.UseVisualStyleBackColor = false;
+            this.ForthButton.Click += new System.EventHandler(this.ForthButton_Click);
             // 
             // CurrentXLabel
             // 
@@ -276,7 +276,7 @@ namespace gui
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.BackgroundImage = global::gui.Properties.Resources._4e3400_speech_bubbles;
+            this.BackgroundImage = global::gui.Properties.Resources.Background;
             this.ClientSize = new System.Drawing.Size(1208, 650);
             this.Controls.Add(this.EndLabel);
             this.Controls.Add(this.EndYBox);
@@ -305,7 +305,6 @@ namespace gui
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainWindow";
             this.Text = "Shut-Your-Bubble";
-            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.ImageBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
