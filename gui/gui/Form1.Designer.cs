@@ -107,6 +107,7 @@ namespace gui
             // 
             this.SaveButton.BackColor = System.Drawing.Color.White;
             this.SaveButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.SaveButton.Enabled = false;
             this.SaveButton.Location = new System.Drawing.Point(993, 536);
             this.SaveButton.Name = "SaveButton";
             this.SaveButton.Size = new System.Drawing.Size(104, 30);
