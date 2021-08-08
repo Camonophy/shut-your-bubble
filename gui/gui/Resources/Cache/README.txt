@@ -1,0 +1,1 @@
+This directory will be used by the Python script and the back/forth function in the GUI
