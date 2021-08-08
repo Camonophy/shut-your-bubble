@@ -8,7 +8,7 @@ Remove text from speech bubbles in comics, cartoons, manga or similar graphical 
    
 ## Dependencies:
 
-First, install Tesseract's english language package, so the program is able to recognize english texts within images. 
+First, install Tesseract's english language package, so that the program is able to recognize english texts within images. 
 
 ### Ubuntu
    
