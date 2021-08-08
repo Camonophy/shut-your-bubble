@@ -1,12 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace gui
@@ -36,6 +30,15 @@ namespace gui
         }
 
         /**
+         * Coordinates of the current mouse position in the ImageBox
+         */
+        private void ImageBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            this.CurrentXBox.Text = e.X.ToString();
+            this.CurrentYBox.Text = e.Y.ToString();
+        }
+
+        /**
          * Get the X and Y coordinates as the top left corner of the rectangle, in which 
          * the user wants remove the text.
          */
@@ -54,10 +57,11 @@ namespace gui
          */
         private void ImageBox_MouseUp(object sender, MouseEventArgs e)
         {
-            this.ImageBox.Cursor = System.Windows.Forms.Cursors.WaitCursor;
-
-            this.EndXBox.Text = e.X.ToString();
-            this.EndYBox.Text = e.Y.ToString();
+            this.ImageBox.Cursor    = System.Windows.Forms.Cursors.WaitCursor;
+            this.ImageBox.Enabled   = false;
+            this.SaveButton.Enabled = false;
+            this.EndXBox.Text       = e.X.ToString();
+            this.EndYBox.Text       = e.Y.ToString();
 
             // If the user goes x images back and creates a new one, delete all x images
             for(int i = this.index + 1; i <= this.stepCount;  i++)
@@ -77,15 +81,18 @@ namespace gui
 
             // Run the Python-Script
             System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
-            start.FileName = "python.exe";
+            start.FileName  = "python.exe";
             start.Arguments = this.SCRIPTPATH +                              
-                              String.Format(" {0} {1} {2} {3} ", 550, 123, 446, 49) +
+                              String.Format(" {0} {1} {2} {3} ", int.Parse(this.StartXBox.Text.ToString()),
+                                                                 int.Parse(this.StartYBox.Text.ToString()), 
+                                                                 int.Parse(this.EndXBox.Text.ToString()) - int.Parse(this.StartXBox.Text.ToString()),
+                                                                 int.Parse(this.EndYBox.Text.ToString()) - int.Parse(this.StartYBox.Text.ToString())) +
                               this.CACHEPATH + this.fileName;
-            start.UseShellExecute = false;
-            start.CreateNoWindow = true; 
+            start.UseShellExecute        = false;
+            start.CreateNoWindow         = true; 
             start.RedirectStandardOutput = true;
-            start.RedirectStandardError = true; 
-            start.LoadUserProfile = true;
+            start.RedirectStandardError  = true; 
+            start.LoadUserProfile        = true;
             using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(start))
             {
                 using (StreamReader reader = process.StandardOutput)
@@ -110,16 +117,9 @@ namespace gui
                 // No image is loaded and therefore no image can be saved
             }
 
-            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-        }
-
-        /**
-         * Coordinates of the current mouse position in the ImageBox
-         */
-        private void ImageBox_MouseMove(object sender, MouseEventArgs e)
-        {
-            this.CurrentXBox.Text = e.X.ToString();
-            this.CurrentYBox.Text = e.Y.ToString();
+            this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
+            this.ImageBox.Enabled   = true;
+            this.SaveButton.Enabled = true;
         }
 
         /**
@@ -166,17 +166,25 @@ namespace gui
          */
         private void load_Click(object sender, EventArgs e)
         {
+            this.ImageBox.Enabled   = false;
+            this.SaveButton.Enabled = false;
             foreach (FileInfo file in cachDirectory.GetFiles())
             {
-                file.Delete();
+                try
+                {
+                    file.Delete();
+                } catch (IOException) {
+                    // This file is still open
+                }
+
             }
 
             OpenFileDialog findImageDialog = new OpenFileDialog();
-            findImageDialog.Title = "Please select an image";
+            findImageDialog.Title  = "Please select an image";
             findImageDialog.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png";
             findImageDialog.FilterIndex = 3;
             findImageDialog.ShowDialog();
-            this.path = findImageDialog.FileName.ToString();
+            this.path     = findImageDialog.FileName.ToString();
             this.fileName = findImageDialog.SafeFileName.ToString();
             try
             {
@@ -186,7 +194,8 @@ namespace gui
                 Image image = this.ImageBox.Image;
                 image.Save(Path.Combine(this.CACHEPATH, "0"));
                 this.SaveButton.Enabled = true;
-            } catch(ArgumentException) {
+                this.ImageBox.Enabled   = true;
+            } catch(Exception) {
                 // File dialog is closed and therefore no file is loaded
             }
         }
@@ -197,7 +206,7 @@ namespace gui
         private void SaveButton_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveImageDialog = new SaveFileDialog();
-            saveImageDialog.Title = "Save the image";
+            saveImageDialog.Title  = "Save the image";
             saveImageDialog.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png";
             saveImageDialog.FilterIndex = 3;
             saveImageDialog.ShowDialog();
@@ -254,14 +263,14 @@ namespace gui
         {
             if (File.Exists(path))
             {
-                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+                using (FileStream stream   = new FileStream(path, FileMode.Open, FileAccess.Read))
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
                     var memoryStream = new MemoryStream(reader.ReadBytes((int)stream.Length));
                     return new Bitmap(memoryStream);
                 }
             } else {
-                this.PathBox.Text = "Error: Can not load this file.";
+                this.PathBox.Text = "Error: No file loaded";
                 return null;
             }
         }

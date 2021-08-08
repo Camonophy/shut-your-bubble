@@ -52,17 +52,21 @@ namespace gui
             this.EndXBox = new System.Windows.Forms.TextBox();
             this.EndYLabel = new System.Windows.Forms.Label();
             this.EndXLabel = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.ImageBox)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // ImageBox
             // 
             this.ImageBox.AllowDrop = true;
-            this.ImageBox.BackColor = System.Drawing.Color.White;
+            this.ImageBox.BackColor = System.Drawing.Color.Cornsilk;
             this.ImageBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ImageBox.Location = new System.Drawing.Point(5, 6);
+            this.ImageBox.Enabled = false;
+            this.ImageBox.Location = new System.Drawing.Point(0, 0);
             this.ImageBox.Name = "ImageBox";
-            this.ImageBox.Size = new System.Drawing.Size(865, 640);
+            this.ImageBox.Size = new System.Drawing.Size(866, 644);
+            this.ImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.ImageBox.TabIndex = 0;
             this.ImageBox.TabStop = false;
             this.ImageBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ImageBox_MouseDown);
@@ -71,7 +75,7 @@ namespace gui
             // 
             // LoadButton
             // 
-            this.LoadButton.BackColor = System.Drawing.Color.White;
+            this.LoadButton.BackColor = System.Drawing.Color.Cornsilk;
             this.LoadButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.LoadButton.Location = new System.Drawing.Point(993, 292);
             this.LoadButton.Name = "LoadButton";
@@ -84,7 +88,7 @@ namespace gui
             // PathBox
             // 
             this.PathBox.AllowDrop = true;
-            this.PathBox.BackColor = System.Drawing.SystemColors.Control;
+            this.PathBox.BackColor = System.Drawing.Color.Cornsilk;
             this.PathBox.Location = new System.Drawing.Point(903, 263);
             this.PathBox.Name = "PathBox";
             this.PathBox.ReadOnly = true;
@@ -94,6 +98,7 @@ namespace gui
             // 
             // LanguageSelect
             // 
+            this.LanguageSelect.BackColor = System.Drawing.Color.Cornsilk;
             this.LanguageSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.LanguageSelect.FormattingEnabled = true;
             this.LanguageSelect.Items.AddRange(new object[] {
@@ -105,7 +110,7 @@ namespace gui
             // 
             // SaveButton
             // 
-            this.SaveButton.BackColor = System.Drawing.Color.White;
+            this.SaveButton.BackColor = System.Drawing.Color.Cornsilk;
             this.SaveButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.SaveButton.Enabled = false;
             this.SaveButton.Location = new System.Drawing.Point(993, 536);
@@ -118,7 +123,7 @@ namespace gui
             // 
             // BackButton
             // 
-            this.BackButton.BackColor = System.Drawing.Color.White;
+            this.BackButton.BackColor = System.Drawing.Color.Cornsilk;
             this.BackButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BackButton.Image = global::gui.Properties.Resources.Back;
             this.BackButton.Location = new System.Drawing.Point(876, 6);
@@ -131,7 +136,7 @@ namespace gui
             // 
             // ForthButton
             // 
-            this.ForthButton.BackColor = System.Drawing.Color.White;
+            this.ForthButton.BackColor = System.Drawing.Color.Cornsilk;
             this.ForthButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.ForthButton.Image = global::gui.Properties.Resources.Forth;
             this.ForthButton.Location = new System.Drawing.Point(928, 6);
@@ -272,13 +277,26 @@ namespace gui
             this.EndXLabel.TabIndex = 17;
             this.EndXLabel.Text = "X:";
             // 
+            // panel1
+            // 
+            this.panel1.AutoScroll = true;
+            this.panel1.BackColor = System.Drawing.Color.Cornsilk;
+            this.panel1.Controls.Add(this.ImageBox);
+            this.panel1.Location = new System.Drawing.Point(4, 3);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(866, 644);
+            this.panel1.TabIndex = 22;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.White;
             this.BackgroundImage = global::gui.Properties.Resources.Background;
             this.ClientSize = new System.Drawing.Size(1208, 650);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.EndLabel);
             this.Controls.Add(this.EndYBox);
             this.Controls.Add(this.EndXBox);
@@ -300,13 +318,14 @@ namespace gui
             this.Controls.Add(this.LanguageSelect);
             this.Controls.Add(this.PathBox);
             this.Controls.Add(this.LoadButton);
-            this.Controls.Add(this.ImageBox);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainWindow";
             this.Text = "Shut-Your-Bubble";
             ((System.ComponentModel.ISupportInitialize)(this.ImageBox)).EndInit();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -336,6 +355,7 @@ namespace gui
         private System.Windows.Forms.TextBox EndXBox;
         private System.Windows.Forms.Label EndYLabel;
         private System.Windows.Forms.Label EndXLabel;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 
