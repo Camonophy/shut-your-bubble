@@ -106,6 +106,7 @@ namespace gui
             this.LanguageSelect.Location = new System.Drawing.Point(903, 382);
             this.LanguageSelect.Name = "LanguageSelect";
             this.LanguageSelect.Size = new System.Drawing.Size(274, 24);
+            this.LanguageSelect.SelectedIndex = 0;
             this.LanguageSelect.TabIndex = 3;
             // 
             // SaveButton

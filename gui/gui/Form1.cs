@@ -134,6 +134,7 @@ namespace gui
                 try
                 {
                     this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + --this.index);
+                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
                 } catch(FileNotFoundException)
                 {
                     // No file is loaded and therefore can not be replaced by another one
@@ -152,6 +153,7 @@ namespace gui
                 try
                 {
                     this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + ++this.index);
+                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
                 }
                 catch (FileNotFoundException)
                 {
