@@ -6,8 +6,6 @@ import sys
 from PIL         import ImageDraw, Image
 from pytesseract import Output
 
-from PIL import Image
-
 # Insert public functions here
 __all__ = ["remove_section"]
 
