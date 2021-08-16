@@ -251,7 +251,7 @@ namespace gui
                 {
                     System.IO.File.Move(this.CACHEPATH + i.ToString(), this.CACHEPATH + (i - 1).ToString());
                 }
-            } catch (Exception e)
+            } catch (Exception)
             {
                 // One file is missing
             }
