@@ -17,8 +17,9 @@ __all__ = ["remove_section"]
     param x, y:       Top left corner of the area
     param w, h:       Coordination of the bottom right corner
                       relevant to the top left corner
+    param color:      Color of the rectangle
 '''
-def remove_section(x, y, w, h, image_path):
+def remove_section(x, y, w, h, image_path, color="#FFFFFF"):
 
     # Default Tesseract system path for Windows machines
     if os.name == 'nt':
@@ -34,7 +35,7 @@ def remove_section(x, y, w, h, image_path):
     # Get the coordinations of the found texts
     word_box_cord = [(data['left'][i], data['top'][i], data['width'][i], data['height'][i]) for i in word_indexes]
     
-    paint_over_text(word_box_cord, image_path, x, y)
+    paint_over_text(word_box_cord, image_path, x, y, color)
 
 
 '''
@@ -67,16 +68,17 @@ def load_binary_image(path):
     param word_box_coords:  Coordinates of the word box surrounding the text
     param image_path:       Source path of the image
     param x, y:             The top left corner of the cropped image
+    param color:            Color of the rectangle
 '''
-def paint_over_text(word_box_coords, image_path, x, y):
+def paint_over_text(word_box_coords, image_path, x, y, color):
     img = Image.open(image_path)
     draw = ImageDraw.Draw(img)
 
     for word_box in word_box_coords:
         draw.rectangle([(x + word_box[0], y + word_box[1]),      
                         (x + word_box[0] + word_box[2], y + word_box[1] + word_box[3])], 
-                        outline = "white", 
-                        fill    = (255,255,255) )
+                        outline = color, 
+                        fill    = color )
                     
     img.save(image_path)
 
@@ -89,5 +91,5 @@ if __name__ == "__main__":
 
         remove_section(X, Y, W, H, PATH)
     else:
-        filename = str(" ".join(sys.argv[5: len(sys.argv)]))
-        remove_section(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), filename)
+        filename = str(" ".join(sys.argv[6: len(sys.argv)]))
+        remove_section(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), filename, str(sys.argv[5]))
