@@ -21,7 +21,17 @@ namespace gui
         private string path;
         private string fileName;
 
+        // Directory of the image backup files
         private DirectoryInfo cachDirectory;
+
+        // Color dialog window to change the color of the replacing rectangles
+        private ColorDialog CDialog = new ColorDialog();
+
+        // Distinguish between "the user wants wo pick a color from an image" or "the user wants to remove text from an image"
+        private bool readColorMode = false;
+
+        // Bitmap to figure out the color of a specific pixel in read-color-mode
+        private Bitmap bmp;
 
         public MainWindow()
         {
@@ -44,8 +54,11 @@ namespace gui
          */
         private void ImageBox_MouseDown(object sender, MouseEventArgs e)
         {
-            this.StartXBox.Text = e.X.ToString();
-            this.StartYBox.Text = e.Y.ToString();
+            if (!this.readColorMode)
+            {
+                this.StartXBox.Text = e.X.ToString();
+                this.StartYBox.Text = e.Y.ToString();
+            }
         }
 
         /**
@@ -57,78 +70,92 @@ namespace gui
          */
         private void ImageBox_MouseUp(object sender, MouseEventArgs e)
         {
-            this.ImageBox.Cursor    = System.Windows.Forms.Cursors.WaitCursor;
-            this.ImageBox.Enabled   = false;
-            this.SaveButton.Enabled = false;
-            this.EndXBox.Text       = e.X.ToString();
-            this.EndYBox.Text       = e.Y.ToString();
-
-            // If the user goes x images back and creates a new one, delete all x images
-            for(int i = this.index + 1; i <= this.stepCount;  i++)
+            if(!this.readColorMode)
             {
-                File.Delete(this.CACHEPATH + i);
-            }
+                this.ImageBox.Cursor    = System.Windows.Forms.Cursors.WaitCursor;
+                this.ImageBox.Enabled   = false;
+                this.SaveButton.Enabled = false;
+                this.EndXBox.Text       = e.X.ToString();
+                this.EndYBox.Text       = e.Y.ToString();
 
-            // After 100 backup copies, delete the first, sort and append a new
-            if (this.stepCount == 100)
-            {
-                File.Delete(this.CACHEPATH + 0);
-                this.ReNumerade_files();
-
-            } else {
-                this.stepCount = ++this.index;
-            }
-
-            // Run the Python-Script
-            System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
-            start.FileName  = "python.exe";
-            start.Arguments = this.SCRIPTPATH +                              
-                              String.Format(" {0} {1} {2} {3} ", int.Parse(this.StartXBox.Text.ToString()),
-                                                                 int.Parse(this.StartYBox.Text.ToString()), 
-                                                                 int.Parse(this.EndXBox.Text.ToString()) - int.Parse(this.StartXBox.Text.ToString()),
-                                                                 int.Parse(this.EndYBox.Text.ToString()) - int.Parse(this.StartYBox.Text.ToString())) +
-                              this.CACHEPATH + this.fileName;
-            start.UseShellExecute        = false;
-            start.CreateNoWindow         = true; 
-            start.RedirectStandardOutput = true;
-            start.RedirectStandardError  = true; 
-            start.LoadUserProfile        = true;
-            using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(start))
-            {
-                using (StreamReader reader = process.StandardOutput)
+                // If the user goes x images back and creates a new one, delete all x images
+                for(int i = this.index + 1; i <= this.stepCount;  i++)
                 {
-                    string stderr = process.StandardError.ReadToEnd(); 
-                    string result = reader.ReadToEnd(); 
-                    Console.WriteLine("From System Diagnostics");
-                    Console.WriteLine(stderr);
-                    Console.WriteLine(result);
+                    File.Delete(this.CACHEPATH + i);
                 }
+
+                // After 100 backup copies, delete the first, sort and append a new
+                if (this.stepCount == 100)
+                {
+                    File.Delete(this.CACHEPATH + 0);
+                    this.ReNumerade_files();
+
+                } else {
+                    this.stepCount = ++this.index;
+                }
+
+                // Run the Python-Script
+                System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
+                start.FileName  = "python.exe";
+                start.Arguments = this.SCRIPTPATH +                              
+                                  String.Format(" {0} {1} {2} {3} {4} {5} ", 
+                                                 int.Parse(this.StartXBox.Text.ToString()),
+                                                 int.Parse(this.StartYBox.Text.ToString()), 
+                                                 int.Parse(this.EndXBox.Text.ToString()) - int.Parse(this.StartXBox.Text.ToString()),
+                                                 int.Parse(this.EndYBox.Text.ToString()) - int.Parse(this.StartYBox.Text.ToString()),
+                                                 this.ColorBox.Text,
+                                                 this.CACHEPATH + this.fileName);
+                start.UseShellExecute        = false;
+                start.CreateNoWindow         = true; 
+                start.RedirectStandardOutput = true;
+                start.RedirectStandardError  = true; 
+                start.LoadUserProfile        = true;
+                using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(start))
+                {
+                    using (StreamReader reader = process.StandardOutput)
+                    {
+                        string stderr = process.StandardError.ReadToEnd(); 
+                        string result = reader.ReadToEnd(); 
+                        Console.WriteLine("From System Diagnostics");
+                        Console.WriteLine(stderr);
+                        Console.WriteLine(result);
+                    }
+                }
+
+                // Load the Python output file
+                this.ImageBox.Image = LoadBitMap(this.CACHEPATH + this.fileName);
+
+                // Safe the new picture as a backup copy
+                try
+                {
+                    Image image = this.ImageBox.Image;
+                    image.Save(this.CACHEPATH + this.stepCount);
+                } catch (NullReferenceException) {
+                    // No image is loaded and therefore no image can be saved
+                }
+
+                this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
+                this.ImageBox.Enabled   = true;
+                this.SaveButton.Enabled = true;
+            } else {
+                Color pixelColor = bmp.GetPixel(e.X, e.Y);
+                this.ColorBox.Text = ColorToHex(pixelColor);
+                this.ColorButton.BackColor = pixelColor;
+                this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+                this.readColorMode = false;
             }
-
-            // Load the Python output file
-            this.ImageBox.Image = LoadBitMap(this.CACHEPATH + this.fileName);
-
-            // Safe the new picture as a backup copy
-            try
-            {
-                Image image = this.ImageBox.Image;
-                image.Save(this.CACHEPATH + this.stepCount);
-            } catch (NullReferenceException) {
-                // No image is loaded and therefore no image can be saved
-            }
-
-            this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
-            this.ImageBox.Enabled   = true;
-            this.SaveButton.Enabled = true;
         }
 
         /**
          * If the user wants to undo his the last actions, load the previous image
          * from the Cache folder
          */
-        private void backButton_Click(object sender, EventArgs e)
+        private void BackButton_Click(object sender, EventArgs e)
         {
-            if(this.index > 0 && this.ImageBox.Image != null) 
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
+
+            if (this.index > 0 && this.ImageBox.Image != null) 
             {
                 //////// Not sure abt these paths ///////
                 try
@@ -148,6 +175,9 @@ namespace gui
          */
         private void ForthButton_Click(object sender, EventArgs e)
         {
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
+
             if (this.index != this.stepCount && this.ImageBox.Image != null)
             {
                 try
@@ -166,8 +196,10 @@ namespace gui
          * Clear the Cache directory and load an image from the 
          * file dialog into the ImageBox
          */
-        private void load_Click(object sender, EventArgs e)
+        private void Load_Click(object sender, EventArgs e)
         {
+            this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
+            this.readColorMode      = false;
             this.ImageBox.Enabled   = false;
             this.SaveButton.Enabled = false;
             foreach (FileInfo file in cachDirectory.GetFiles())
@@ -191,14 +223,19 @@ namespace gui
             try
             {
                 System.IO.File.Copy(this.path, this.CACHEPATH + this.fileName, true);
-                this.ImageBox.Image = LoadBitMap(this.CACHEPATH + this.fileName);
-                this.PathBox.Text = this.path;
+                this.bmp = LoadBitMap(this.CACHEPATH + this.fileName);
+                this.ImageBox.Image = bmp;
+                this.PathBox.Text   = this.path;
                 Image image = this.ImageBox.Image;
                 image.Save(Path.Combine(this.CACHEPATH, "0"));
-                this.SaveButton.Enabled = true;
-                this.ImageBox.Enabled   = true;
+                this.SaveButton.Enabled    = true;
+                this.ImageBox.Enabled      = true;
+                this.PipetteButton.Enabled = true;
             } catch(Exception) {
                 // File dialog is closed and therefore no file is loaded
+                this.SaveButton.Enabled = true;
+                this.ImageBox.Enabled = true;
+                this.PipetteButton.Enabled = true;
             }
         }
 
@@ -207,6 +244,8 @@ namespace gui
          */
         private void SaveButton_Click(object sender, EventArgs e)
         {
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
             SaveFileDialog saveImageDialog = new SaveFileDialog();
             saveImageDialog.Title  = "Save the image";
             saveImageDialog.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png";
@@ -257,6 +296,20 @@ namespace gui
             }
         }
 
+        private void ColorButton_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
+
+            // Sets the initial color select to the current text color.
+            this.CDialog.Color = this.ColorButton.ForeColor;
+
+            // Update the text box color if the user clicks OK 
+            if (this.CDialog.ShowDialog() == DialogResult.OK)
+                this.ColorButton.BackColor = this.CDialog.Color;
+                this.ColorBox.Text = ColorToHex(this.ColorButton.BackColor);
+        }
+
         /**
          * Create a copy of the original file as bitmap, in order to open the original 
          * with Python and C#. (Permission errors would arise otherwise) 
@@ -275,6 +328,43 @@ namespace gui
                 this.PathBox.Text = "Error: No file loaded";
                 return null;
             }
+        }
+
+        private void PipetteButton_Click(object sender, EventArgs e)
+        {
+            if(this.readColorMode)
+            {
+                this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+                this.readColorMode = false;
+            } else {
+                this.ImageBox.Cursor = System.Windows.Forms.Cursors.Cross;
+                this.readColorMode = true;
+            }
+        }
+
+        private void ColorBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            try
+            {
+                Color colorFromTextBox = (Color)(new ColorConverter()).ConvertFromString(this.ColorBox.Text);
+                if(colorFromTextBox.ToArgb() < 0)
+                {
+                    this.ColorButton.BackColor = colorFromTextBox;
+                }
+            } catch (Exception) {
+                // No valid hex number found to convert into a color
+            }
+        }
+
+        private void MainWindow_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
+        }
+
+        private String ColorToHex(Color actColor)
+        {
+            return "#" + actColor.R.ToString("X2") + actColor.G.ToString("X2") + actColor.B.ToString("X2");
         }
     }
 }
