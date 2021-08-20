@@ -105,14 +105,11 @@ namespace gui
             this.LanguageSelect.BackColor = System.Drawing.Color.Cornsilk;
             this.LanguageSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.LanguageSelect.FormattingEnabled = true;
-            this.LanguageSelect.Items.AddRange(new object[] {
-            "English"});
             this.LanguageSelect.Location = new System.Drawing.Point(903, 282);
             this.LanguageSelect.Name = "LanguageSelect";
             this.LanguageSelect.Size = new System.Drawing.Size(274, 24);
             this.LanguageSelect.TabIndex = 3;
             this.LanguageSelect.TabStop = false;
-            this.LanguageSelect.SelectedIndex = 0;
             // 
             // SaveButton
             // 

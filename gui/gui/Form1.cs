@@ -27,18 +27,22 @@ namespace gui
         private int index, stepCount = 0;
 
         // Map the installed Tesseract languages to their full notation
-        Dictionary languages = new Dictionary<string, string>(){
-	        {"chi_sim", "Chinese (Simplified)"},
-	        {"chi_tra", "Chinese (Traditional)"},
-	        {"deu",     "German"},
-            {"eng",     "English"},
-            {"fra",     "French"},
-            {"ita",     "Italian"},
-            {"jpn",     "Japanese"},
-            {"kor",     "Korean"},
-            {"rus",     "Russian"},
-            {"spa",     "Spanish"}
-        };
+        System.Collections.Generic.Dictionary<string, string> languages = 
+            new System.Collections.Generic.Dictionary<string, string>(){
+	            {"chi_sim",      "Chinese (Simplified)"},
+                {"chi_sim_vert", "Chinese Vertical (Simplified)"},
+                {"chi_tra",      "Chinese (Traditional)"},
+	            {"chi_tra_vert", "Chinese Vertical (Traditional)"},
+                {"deu",          "German"},
+                {"eng",          "English"},
+                {"fra",          "French"},
+                {"ita",          "Italian"},
+                {"jpn",          "Japanese"},
+                {"jpn_vert",     "Japanese Vertical"},
+                {"kor",          "Korean"},
+                {"rus",          "Russian"},
+                {"spa",          "Spanish"}
+            };
 
         // Original image path and name
         private string path;
@@ -52,7 +56,20 @@ namespace gui
         {
             InitializeComponent();
             cachDirectory = new DirectoryInfo(this.CACHEPATH);
-            
+            String[] installed_languages = this.Get_Installed_Tessarect_Languages();
+
+            foreach (String lan in installed_languages)
+            {
+                try { this.LanguageSelect.Items.Add(languages[lan]); } 
+                catch(Exception) { } // Language not supported
+            }
+
+            if(this.LanguageSelect.Items.Count == 0)
+            {
+                this.LanguageSelect.Items.Add("No language found");
+            }
+
+            this.LanguageSelect.SelectedIndex = 0;
         }
 
 
@@ -72,17 +89,14 @@ namespace gui
                 {
                     this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + --this.index);
                     System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
-                } catch(FileNotFoundException)
-                {
-                    // No file is loaded and therefore can not be replaced by another one
-                }
+                } catch(FileNotFoundException) { } // No file is loaded and therefore can not be replaced by another one
             }
         }
 
         /**
          * Convert a color into a string, that represents the corresponding hex value
          */
-        private String ColorToHex(Color actColor)
+        private String Color_To_Hex(Color actColor)
         {
             return "#" + actColor.R.ToString("X2") + actColor.G.ToString("X2") + actColor.B.ToString("X2");
         }
@@ -101,9 +115,7 @@ namespace gui
                 {
                     this.ColorButton.BackColor = colorFromTextBox;
                 }
-            } catch (Exception) {
-                // No valid hex number found to convert into a color
-            }
+            } catch (Exception) { } // No valid hex number found to convert into a color
         }
 
 
@@ -122,7 +134,7 @@ namespace gui
             // Update the text box color if the user clicks OK 
             if (this.CDialog.ShowDialog() == DialogResult.OK)
                 this.ColorButton.BackColor = this.CDialog.Color;
-                this.ColorBox.Text = ColorToHex(this.ColorButton.BackColor);
+                this.ColorBox.Text = Color_To_Hex(this.ColorButton.BackColor);
         }
 
 
@@ -142,11 +154,40 @@ namespace gui
                     this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + ++this.index);
                     System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
                 }
-                catch (FileNotFoundException)
+                catch (FileNotFoundException) { } // No file is loaded and therefore can not be replaced by another one
+            }
+        }
+
+
+        /**
+        * Ask Tesseract for all available languages that has been installed
+        */
+        private String[] Get_Installed_Tessarect_Languages()
+        {
+            String[] languages = new string[] { };
+
+            System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
+            start.FileName = "python";
+            start.Arguments = "-c \"import pytesseract; print(pytesseract.get_languages())\"";
+            start.UseShellExecute = false;
+            start.CreateNoWindow = true;
+            start.RedirectStandardOutput = true;
+            start.RedirectStandardError = true;
+            start.LoadUserProfile = true;
+            using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(start))
+            {
+                using (StreamReader reader = process.StandardOutput)
                 {
-                    // No file is loaded and therefore can not be replaced by another one
+                    string stderr = process.StandardError.ReadToEnd();
+                    string result = reader.ReadToEnd();
+                    languages = result.Substring(2, result.Length - 4)
+                                      .Replace(" ", "")
+                                      .Replace("\'", "")
+                                      .Split(',');
                 }
             }
+
+            return languages;
         }
 
 
@@ -201,7 +242,7 @@ namespace gui
                 if (this.stepCount == 100)
                 {
                     File.Delete(this.CACHEPATH + 0);
-                    this.ReNumerade_files();
+                    this.Renumerade_Files();
 
                 } else {
                     this.stepCount = ++this.index;
@@ -209,7 +250,7 @@ namespace gui
 
                 // Run the Python-Script
                 System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
-                start.FileName  = "python.exe";
+                start.FileName  = "python";
                 start.Arguments = this.SCRIPTPATH +                              
                                   String.Format(" {0} {1} {2} {3} {4} {5} ", 
                                                  int.Parse(this.StartXBox.Text.ToString()),
@@ -235,23 +276,21 @@ namespace gui
                 }
 
                 // Load the Python output file
-                this.ImageBox.Image = LoadBitMap(this.CACHEPATH + this.fileName);
+                this.ImageBox.Image = Load_BitMap(this.CACHEPATH + this.fileName);
 
                 // Safe the new picture as a backup copy
                 try
                 {
                     Image image = this.ImageBox.Image;
                     image.Save(this.CACHEPATH + this.stepCount);
-                } catch (NullReferenceException) {
-                    // No image is loaded and therefore no image can be saved
-                }
+                } catch (NullReferenceException) { } // No image is loaded and therefore no image can be saved
 
                 this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
                 this.ImageBox.Enabled   = true;
                 this.SaveButton.Enabled = true;
             } else {
                 Color pixelColor = bmp.GetPixel(e.X, e.Y);
-                this.ColorBox.Text = ColorToHex(pixelColor);
+                this.ColorBox.Text = Color_To_Hex(pixelColor);
                 this.ColorButton.BackColor = pixelColor;
                 this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
                 this.readColorMode = false;
@@ -263,7 +302,7 @@ namespace gui
          * Create a copy of the original file as bitmap, in order to open the original 
          * with Python and C#. (Permission errors would arise otherwise) 
          */
-        private Bitmap LoadBitMap(string path)
+        private Bitmap Load_BitMap(string path)
         {
             if (File.Exists(path))
             {
@@ -292,12 +331,8 @@ namespace gui
             this.SaveButton.Enabled = false;
             foreach (FileInfo file in cachDirectory.GetFiles())
             {
-                try
-                {
-                    file.Delete();
-                } catch (IOException) {
-                    // This file is still open
-                }
+                try { file.Delete();  } 
+                catch (IOException) { } // This file is still open
 
             }
 
@@ -311,7 +346,7 @@ namespace gui
             try
             {
                 System.IO.File.Copy(this.path, this.CACHEPATH + this.fileName, true);
-                this.bmp = LoadBitMap(this.CACHEPATH + this.fileName);
+                this.bmp = Load_BitMap(this.CACHEPATH + this.fileName);
                 this.ImageBox.Image = bmp;
                 this.PathBox.Text   = this.path;
                 Image image = this.ImageBox.Image;
@@ -361,7 +396,7 @@ namespace gui
          * If 100 copies are reached, the 0th get deleted, image copies 1-100
          * are taking the position of their previous copy and image 100 can be saved.
          */
-        private void ReNumerade_files()
+        private void Renumerade_Files()
         {
             try
             {
@@ -369,10 +404,7 @@ namespace gui
                 {
                     System.IO.File.Move(this.CACHEPATH + i.ToString(), this.CACHEPATH + (i - 1).ToString());
                 }
-            } catch (Exception)
-            {
-                // One file is missing
-            }
+            } catch (Exception) { } // One file is missing
         }
 
 
