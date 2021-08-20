@@ -1,10 +1,13 @@
-import cv2
-import pytesseract 
 import os
 import sys
 
-from PIL         import ImageDraw, Image
-from pytesseract import Output
+try:
+    import cv2
+    import pytesseract
+    from PIL         import ImageDraw, Image
+    from pytesseract import Output
+except:
+    exit() 
 
 # Insert public functions here
 __all__ = ["remove_section"]
@@ -19,7 +22,7 @@ __all__ = ["remove_section"]
                       relevant to the top left corner
     param color:      Color of the rectangle
 '''
-def remove_section(x, y, w, h, image_path, color="#FFFFFF"):
+def remove_section(x, y, w, h, image_path, color="#FFFFFF", language="eng"):
 
     # Default Tesseract system path for Windows machines
     if os.name == 'nt':
@@ -27,7 +30,7 @@ def remove_section(x, y, w, h, image_path, color="#FFFFFF"):
 
     binary_image  = load_binary_image(image_path)
     image_section = get_image_section(binary_image, x, y, w, h)
-    data          = pytesseract.image_to_data(image_section, lang='eng', output_type=Output.DICT)
+    data          = pytesseract.image_to_data(image_section, lang=language, output_type=Output.DICT)
 
     # Remove entries containing no text
     word_indexes  = filter(lambda index: len(data['text'][index]) > 0, range(0, len(data['text'])))
@@ -86,10 +89,16 @@ def paint_over_text(word_box_coords, image_path, x, y, color):
 if __name__ == "__main__":
 
     if len(sys.argv) == 1:
-        PATH = "example\FEheroes.jpg"
+        PATH = "./example/FEheroes.jpg"
         X, Y, W, H = 550, 123, 446, 49
 
         remove_section(X, Y, W, H, PATH)
     else:
-        filename = str(" ".join(sys.argv[6: len(sys.argv)]))
-        remove_section(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), filename, str(sys.argv[5]))
+        filename = str(" ".join(sys.argv[7: len(sys.argv)]))
+        remove_section(int(sys.argv[1]),    # X-Coord 
+                       int(sys.argv[2]),    # Y-Coord               
+                       int(sys.argv[3]),    # Width of the rectangel
+                       int(sys.argv[4]),    # Hight of the rectangel
+                       filename,            # Image path
+                       str(sys.argv[5]),    # Color of the rectangle
+                       str(sys.argv[6]))    # OCR language
