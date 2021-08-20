@@ -26,6 +26,20 @@ namespace gui
         // Used to manage through back and forth option
         private int index, stepCount = 0;
 
+        // Map the installed Tesseract languages to their full notation
+        Dictionary languages = new Dictionary<string, string>(){
+	        {"chi_sim", "Chinese (Simplified)"},
+	        {"chi_tra", "Chinese (Traditional)"},
+	        {"deu",     "German"},
+            {"eng",     "English"},
+            {"fra",     "French"},
+            {"ita",     "Italian"},
+            {"jpn",     "Japanese"},
+            {"kor",     "Korean"},
+            {"rus",     "Russian"},
+            {"spa",     "Spanish"}
+        };
+
         // Original image path and name
         private string path;
         private string fileName;
@@ -38,6 +52,7 @@ namespace gui
         {
             InitializeComponent();
             cachDirectory = new DirectoryInfo(this.CACHEPATH);
+            
         }
 
 
@@ -214,7 +229,6 @@ namespace gui
                     {
                         string stderr = process.StandardError.ReadToEnd(); 
                         string result = reader.ReadToEnd(); 
-                        Console.WriteLine("From System Diagnostics");
                         Console.WriteLine(stderr);
                         Console.WriteLine(result);
                     }
