@@ -14,12 +14,8 @@ namespace gui
         // Path to the Python-Script to remove the text in an image
         private readonly string SCRIPTPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"\..\..\..\..\src\Textinguisher.py";
 
-        // Used to manage through back and forth option
-        private int stepCount, index = 0;
-
-        // Original image path and name
-        private string path;
-        private string fileName;
+        // Bitmap to figure out the color of a specific pixel in read-color-mode
+        private Bitmap bmp;
 
         // Directory of the image backup files
         private DirectoryInfo cachDirectory;
@@ -27,11 +23,16 @@ namespace gui
         // Color dialog window to change the color of the replacing rectangles
         private ColorDialog CDialog = new ColorDialog();
 
+        // Used to manage through back and forth option
+        private int index, stepCount = 0;
+
+        // Original image path and name
+        private string path;
+        private string fileName;
+
         // Distinguish between "the user wants wo pick a color from an image" or "the user wants to remove text from an image"
         private bool readColorMode = false;
 
-        // Bitmap to figure out the color of a specific pixel in read-color-mode
-        private Bitmap bmp;
 
         public MainWindow()
         {
@@ -39,14 +40,100 @@ namespace gui
             cachDirectory = new DirectoryInfo(this.CACHEPATH);
         }
 
+
         /**
-         * Coordinates of the current mouse position in the ImageBox
+         * If the user wants to undo his the last actions, load the previous image
+         * from the Cache folder
          */
-        private void ImageBox_MouseMove(object sender, MouseEventArgs e)
+        private void BackButton_Click(object sender, EventArgs e)
         {
-            this.CurrentXBox.Text = e.X.ToString();
-            this.CurrentYBox.Text = e.Y.ToString();
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
+
+            if (this.index > 0 && this.ImageBox.Image != null) 
+            {
+                //////// Not sure abt these paths ///////
+                try
+                {
+                    this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + --this.index);
+                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
+                } catch(FileNotFoundException)
+                {
+                    // No file is loaded and therefore can not be replaced by another one
+                }
+            }
         }
+
+        /**
+         * Convert a color into a string, that represents the corresponding hex value
+         */
+        private String ColorToHex(Color actColor)
+        {
+            return "#" + actColor.R.ToString("X2") + actColor.G.ToString("X2") + actColor.B.ToString("X2");
+        }
+
+
+        /**
+         * Try to read the content of the ColorBox, convert the hex number into
+         * an actual color if possible and show the color on the ColorButton.
+         */
+        private void ColorBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            try
+            {
+                Color colorFromTextBox = (Color)(new ColorConverter()).ConvertFromString(this.ColorBox.Text);
+                if(colorFromTextBox.ToArgb() < 0)
+                {
+                    this.ColorButton.BackColor = colorFromTextBox;
+                }
+            } catch (Exception) {
+                // No valid hex number found to convert into a color
+            }
+        }
+
+
+        /**
+         * Open a color dialog, where the user can choose between various default
+         * colors to change the one that will be used to fill the next rectangle
+         */
+        private void ColorButton_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
+
+            // Sets the initial color select to the current text color.
+            this.CDialog.Color = this.ColorButton.ForeColor;
+
+            // Update the text box color if the user clicks OK 
+            if (this.CDialog.ShowDialog() == DialogResult.OK)
+                this.ColorButton.BackColor = this.CDialog.Color;
+                this.ColorBox.Text = ColorToHex(this.ColorButton.BackColor);
+        }
+
+
+        /**
+         * If the user wants to redo one of his lasta ctions, load his next image
+         * from the Cache folder
+         */
+        private void ForthButton_Click(object sender, EventArgs e)
+        {
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
+
+            if (this.index != this.stepCount && this.ImageBox.Image != null)
+            {
+                try
+                {
+                    this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + ++this.index);
+                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
+                }
+                catch (FileNotFoundException)
+                {
+                    // No file is loaded and therefore can not be replaced by another one
+                }
+            }
+        }
+
 
         /**
          * Get the X and Y coordinates as the top left corner of the rectangle, in which 
@@ -60,6 +147,17 @@ namespace gui
                 this.StartYBox.Text = e.Y.ToString();
             }
         }
+
+
+        /**
+         * Coordinates of the current mouse position in the ImageBox
+         */
+        private void ImageBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            this.CurrentXBox.Text = e.X.ToString();
+            this.CurrentYBox.Text = e.Y.ToString();
+        }
+
 
         /**
          * Get the X and Y coordinates as the bottom right corner of the rectangle, in which 
@@ -146,51 +244,27 @@ namespace gui
             }
         }
 
-        /**
-         * If the user wants to undo his the last actions, load the previous image
-         * from the Cache folder
-         */
-        private void BackButton_Click(object sender, EventArgs e)
-        {
-            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
 
-            if (this.index > 0 && this.ImageBox.Image != null) 
+        /**
+         * Create a copy of the original file as bitmap, in order to open the original 
+         * with Python and C#. (Permission errors would arise otherwise) 
+         */
+        private Bitmap LoadBitMap(string path)
+        {
+            if (File.Exists(path))
             {
-                //////// Not sure abt these paths ///////
-                try
+                using (FileStream stream   = new FileStream(path, FileMode.Open, FileAccess.Read))
+                using (BinaryReader reader = new BinaryReader(stream))
                 {
-                    this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + --this.index);
-                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
-                } catch(FileNotFoundException)
-                {
-                    // No file is loaded and therefore can not be replaced by another one
+                    var memoryStream = new MemoryStream(reader.ReadBytes((int)stream.Length));
+                    return new Bitmap(memoryStream);
                 }
+            } else {
+                this.PathBox.Text = "Error: No file loaded";
+                return null;
             }
         }
 
-        /**
-         * If the user wants to redo one of his lasta ctions, load his next image
-         * from the Cache folder
-         */
-        private void ForthButton_Click(object sender, EventArgs e)
-        {
-            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
-
-            if (this.index != this.stepCount && this.ImageBox.Image != null)
-            {
-                try
-                {
-                    this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + ++this.index);
-                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
-                }
-                catch (FileNotFoundException)
-                {
-                    // No file is loaded and therefore can not be replaced by another one
-                }
-            }
-        }
 
         /**
          * Clear the Cache directory and load an image from the 
@@ -239,6 +313,55 @@ namespace gui
             }
         }
 
+
+        /**
+         * Cancel the color pick mode.
+         */
+        private void MainWindow_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.readColorMode = false;
+        }
+
+
+        /**
+         * Activate the color pick mode, where the user can click on a pixel in the image,
+         * read its RGB values and use this color to determine the color of the rectangle, 
+         * which will cover the texts in the image.
+         */
+        private void PipetteButton_Click(object sender, EventArgs e)
+        {
+            if(this.readColorMode)
+            {
+                this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
+                this.readColorMode = false;
+            } else {
+                this.ImageBox.Cursor = System.Windows.Forms.Cursors.Cross;
+                this.readColorMode = true;
+            }
+        }
+
+
+        /**
+         * The user has 100 backup copies available to turn back to.
+         * If 100 copies are reached, the 0th get deleted, image copies 1-100
+         * are taking the position of their previous copy and image 100 can be saved.
+         */
+        private void ReNumerade_files()
+        {
+            try
+            {
+                for(int i = 1; i <= 100; i++)
+                {
+                    System.IO.File.Move(this.CACHEPATH + i.ToString(), this.CACHEPATH + (i - 1).ToString());
+                }
+            } catch (Exception)
+            {
+                // One file is missing
+            }
+        }
+
+
         /**
          * Safe the image from the Imagebox with the file dialog 
          */
@@ -275,96 +398,6 @@ namespace gui
                 }
                 fs.Close();
             }
-        }
-
-        /**
-         * The user has 100 backup copies available to turn back to.
-         * If 100 copies are reached, the 0th get deleted, image copies 1-100
-         * are taking the position of their previous copy and image 100 can be saved.
-         */
-        private void ReNumerade_files()
-        {
-            try
-            {
-                for(int i = 1; i <= 100; i++)
-                {
-                    System.IO.File.Move(this.CACHEPATH + i.ToString(), this.CACHEPATH + (i - 1).ToString());
-                }
-            } catch (Exception)
-            {
-                // One file is missing
-            }
-        }
-
-        private void ColorButton_MouseClick(object sender, MouseEventArgs e)
-        {
-            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
-
-            // Sets the initial color select to the current text color.
-            this.CDialog.Color = this.ColorButton.ForeColor;
-
-            // Update the text box color if the user clicks OK 
-            if (this.CDialog.ShowDialog() == DialogResult.OK)
-                this.ColorButton.BackColor = this.CDialog.Color;
-                this.ColorBox.Text = ColorToHex(this.ColorButton.BackColor);
-        }
-
-        /**
-         * Create a copy of the original file as bitmap, in order to open the original 
-         * with Python and C#. (Permission errors would arise otherwise) 
-         */
-        private Bitmap LoadBitMap(string path)
-        {
-            if (File.Exists(path))
-            {
-                using (FileStream stream   = new FileStream(path, FileMode.Open, FileAccess.Read))
-                using (BinaryReader reader = new BinaryReader(stream))
-                {
-                    var memoryStream = new MemoryStream(reader.ReadBytes((int)stream.Length));
-                    return new Bitmap(memoryStream);
-                }
-            } else {
-                this.PathBox.Text = "Error: No file loaded";
-                return null;
-            }
-        }
-
-        private void PipetteButton_Click(object sender, EventArgs e)
-        {
-            if(this.readColorMode)
-            {
-                this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-                this.readColorMode = false;
-            } else {
-                this.ImageBox.Cursor = System.Windows.Forms.Cursors.Cross;
-                this.readColorMode = true;
-            }
-        }
-
-        private void ColorBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            try
-            {
-                Color colorFromTextBox = (Color)(new ColorConverter()).ConvertFromString(this.ColorBox.Text);
-                if(colorFromTextBox.ToArgb() < 0)
-                {
-                    this.ColorButton.BackColor = colorFromTextBox;
-                }
-            } catch (Exception) {
-                // No valid hex number found to convert into a color
-            }
-        }
-
-        private void MainWindow_MouseClick(object sender, MouseEventArgs e)
-        {
-            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
-        }
-
-        private String ColorToHex(Color actColor)
-        {
-            return "#" + actColor.R.ToString("X2") + actColor.G.ToString("X2") + actColor.B.ToString("X2");
         }
     }
 }
