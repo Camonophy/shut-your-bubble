@@ -25,7 +25,7 @@ sudo pacman -Syu && sudo pacman -S tesseract-data-eng
   
 Use the Tesseract Windows installation from <a href="https://github.com/UB-Mannheim/tesseract/wiki">this repository</a>.
 
-Add Tesseract-OCR to your PATH variable. Usually you just have to add _C:\Program Files\Tesseract-OCR_. 
+Add Tesseract-OCR to your PATH variable. Assuming you decide to use the installation for every user on your computer, you just have to add _C:\Program Files\Tesseract-OCR_. If you want to install Tesseract just for your own user profile, you have to add _C:\Users\USER_NAME\AppData\Local\Programs\Tesseract-OCR_ to your PATH variable by default.
 
 #### Python
  After installing Tesseract on your machine, simply run:  
