@@ -28,7 +28,7 @@ def remove_section(x, y, w, h, image_path, color="#FFFFFF", language="eng"):
     if os.name == 'nt':
         pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract"
         binary_image  = load_binary_image(image_path)
-        if binary_image.all() == 0:
+        if binary_image is None:
             pytesseract.pytesseract.tesseract_cmd = os.path.expanduser('~') + \
                                                     r"\AppData\Local\Programs\Tesseract-OCR"
             binary_image  = load_binary_image(image_path)
