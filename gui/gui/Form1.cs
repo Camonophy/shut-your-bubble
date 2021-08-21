@@ -2,6 +2,8 @@
 using System.IO;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace gui
 {
@@ -60,7 +62,7 @@ namespace gui
 
             foreach (String lan in installed_languages)
             {
-                try { this.LanguageSelect.Items.Add(languages[lan]); } 
+                try { this.LanguageSelect.Items.Add(this.languages[lan]); } 
                 catch(Exception) { } // Language not supported
             }
 
@@ -180,7 +182,7 @@ namespace gui
                 {
                     string stderr = process.StandardError.ReadToEnd();
                     string result = reader.ReadToEnd();
-                    languages = result.Substring(2, result.Length - 4)
+                    languages = result.Substring(2, result.Length - 5)
                                       .Replace(" ", "")
                                       .Replace("\'", "")
                                       .Split(',');
@@ -252,12 +254,13 @@ namespace gui
                 System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
                 start.FileName  = "python";
                 start.Arguments = this.SCRIPTPATH +                              
-                                  String.Format(" {0} {1} {2} {3} {4} {5} ", 
+                                  String.Format(" {0} {1} {2} {3} {4} {5} {6} ", 
                                                  int.Parse(this.StartXBox.Text.ToString()),
                                                  int.Parse(this.StartYBox.Text.ToString()), 
                                                  int.Parse(this.EndXBox.Text.ToString()) - int.Parse(this.StartXBox.Text.ToString()),
                                                  int.Parse(this.EndYBox.Text.ToString()) - int.Parse(this.StartYBox.Text.ToString()),
                                                  this.ColorBox.Text,
+                                                 this.languages.FirstOrDefault(x => x.Value == this.LanguageSelect.Text).Key,
                                                  this.CACHEPATH + this.fileName);
                 start.UseShellExecute        = false;
                 start.CreateNoWindow         = true; 
