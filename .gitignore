@@ -4,6 +4,7 @@ gui/.vs/
 gui/gui/bin/
 gui/gui/obj/
 gui/gui/Resources/Cache/
+gui/Setup/
 
 # Untrack files
 *.png

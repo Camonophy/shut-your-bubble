@@ -1,10 +1,13 @@
-import cv2
-import pytesseract 
 import os
 import sys
 
-from PIL         import ImageDraw, Image
-from pytesseract import Output
+try:
+    import cv2
+    import pytesseract
+    from PIL         import ImageDraw, Image
+    from pytesseract import Output
+except:
+    exit() 
 
 # Insert public functions here
 __all__ = ["remove_section"]
@@ -17,16 +20,24 @@ __all__ = ["remove_section"]
     param x, y:       Top left corner of the area
     param w, h:       Coordination of the bottom right corner
                       relevant to the top left corner
+    param color:      Color of the rectangle
 '''
-def remove_section(x, y, w, h, image_path):
+def remove_section(x, y, w, h, image_path, color="#FFFFFF", language="eng"):
 
-    # Default Tesseract system path for Windows machines
+    # Default Tesseract system path for Windows machines (two default paths)
     if os.name == 'nt':
-        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
+        pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract"
+        binary_image  = load_binary_image(image_path)
+        if binary_image is None:
+            pytesseract.pytesseract.tesseract_cmd = os.path.expanduser('~') + \
+                                                    r"\AppData\Local\Programs\Tesseract-OCR"
+            binary_image  = load_binary_image(image_path)
+    #Running on a non-Windows machine
+    else:
+        binary_image  = load_binary_image(image_path)    
 
-    binary_image  = load_binary_image(image_path)
     image_section = get_image_section(binary_image, x, y, w, h)
-    data          = pytesseract.image_to_data(image_section, lang='eng', output_type=Output.DICT)
+    data          = pytesseract.image_to_data(image_section, lang=language, output_type=Output.DICT)
 
     # Remove entries containing no text
     word_indexes  = filter(lambda index: len(data['text'][index]) > 0, range(0, len(data['text'])))
@@ -34,7 +45,7 @@ def remove_section(x, y, w, h, image_path):
     # Get the coordinations of the found texts
     word_box_cord = [(data['left'][i], data['top'][i], data['width'][i], data['height'][i]) for i in word_indexes]
     
-    paint_over_text(word_box_cord, image_path, x, y)
+    paint_over_text(word_box_cord, image_path, x, y, color)
 
 
 '''
@@ -67,16 +78,17 @@ def load_binary_image(path):
     param word_box_coords:  Coordinates of the word box surrounding the text
     param image_path:       Source path of the image
     param x, y:             The top left corner of the cropped image
+    param color:            Color of the rectangle
 '''
-def paint_over_text(word_box_coords, image_path, x, y):
+def paint_over_text(word_box_coords, image_path, x, y, color):
     img = Image.open(image_path)
     draw = ImageDraw.Draw(img)
 
     for word_box in word_box_coords:
         draw.rectangle([(x + word_box[0], y + word_box[1]),      
                         (x + word_box[0] + word_box[2], y + word_box[1] + word_box[3])], 
-                        outline = "white", 
-                        fill    = (255,255,255) )
+                        outline = color, 
+                        fill    = color )
                     
     img.save(image_path)
 
@@ -84,10 +96,16 @@ def paint_over_text(word_box_coords, image_path, x, y):
 if __name__ == "__main__":
 
     if len(sys.argv) == 1:
-        PATH = "example\FEheroes.jpg"
+        PATH = "./example/FEheroes.jpg"
         X, Y, W, H = 550, 123, 446, 49
 
         remove_section(X, Y, W, H, PATH)
     else:
-        filename = str(" ".join(sys.argv[5: len(sys.argv)]))
-        remove_section(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), filename)
+        filename = str(" ".join(sys.argv[7: len(sys.argv)]))
+        remove_section(int(sys.argv[1]),    # X-Coord 
+                       int(sys.argv[2]),    # Y-Coord               
+                       int(sys.argv[3]),    # Width of the rectangel
+                       int(sys.argv[4]),    # Hight of the rectangel
+                       filename,            # Image path
+                       str(sys.argv[5]),    # Color of the rectangle
+                       str(sys.argv[6]))    # OCR language

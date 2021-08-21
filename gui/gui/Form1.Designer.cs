@@ -52,9 +52,12 @@ namespace gui
             this.EndXBox = new System.Windows.Forms.TextBox();
             this.EndYLabel = new System.Windows.Forms.Label();
             this.EndXLabel = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.Panel = new System.Windows.Forms.Panel();
+            this.ColorBox = new System.Windows.Forms.TextBox();
+            this.ColorButton = new System.Windows.Forms.Button();
+            this.PipetteButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ImageBox)).BeginInit();
-            this.panel1.SuspendLayout();
+            this.Panel.SuspendLayout();
             this.SuspendLayout();
             // 
             // ImageBox
@@ -77,19 +80,20 @@ namespace gui
             // 
             this.LoadButton.BackColor = System.Drawing.Color.Cornsilk;
             this.LoadButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.LoadButton.Location = new System.Drawing.Point(993, 292);
+            this.LoadButton.Location = new System.Drawing.Point(993, 186);
             this.LoadButton.Name = "LoadButton";
             this.LoadButton.Size = new System.Drawing.Size(104, 30);
             this.LoadButton.TabIndex = 1;
+            this.LoadButton.TabStop = false;
             this.LoadButton.Text = "Load";
             this.LoadButton.UseVisualStyleBackColor = false;
-            this.LoadButton.Click += new System.EventHandler(this.load_Click);
+            this.LoadButton.Click += new System.EventHandler(this.Load_Click);
             // 
             // PathBox
             // 
             this.PathBox.AllowDrop = true;
             this.PathBox.BackColor = System.Drawing.Color.Cornsilk;
-            this.PathBox.Location = new System.Drawing.Point(903, 263);
+            this.PathBox.Location = new System.Drawing.Point(903, 157);
             this.PathBox.Name = "PathBox";
             this.PathBox.ReadOnly = true;
             this.PathBox.Size = new System.Drawing.Size(276, 23);
@@ -101,13 +105,11 @@ namespace gui
             this.LanguageSelect.BackColor = System.Drawing.Color.Cornsilk;
             this.LanguageSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.LanguageSelect.FormattingEnabled = true;
-            this.LanguageSelect.Items.AddRange(new object[] {
-            "English"});
-            this.LanguageSelect.Location = new System.Drawing.Point(903, 382);
+            this.LanguageSelect.Location = new System.Drawing.Point(903, 282);
             this.LanguageSelect.Name = "LanguageSelect";
             this.LanguageSelect.Size = new System.Drawing.Size(274, 24);
-            this.LanguageSelect.SelectedIndex = 0;
             this.LanguageSelect.TabIndex = 3;
+            this.LanguageSelect.TabStop = false;
             // 
             // SaveButton
             // 
@@ -131,9 +133,10 @@ namespace gui
             this.BackButton.Name = "BackButton";
             this.BackButton.Size = new System.Drawing.Size(36, 30);
             this.BackButton.TabIndex = 5;
+            this.BackButton.TabStop = false;
             this.BackButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.BackButton.UseVisualStyleBackColor = false;
-            this.BackButton.Click += new System.EventHandler(this.backButton_Click);
+            this.BackButton.Click += new System.EventHandler(this.BackButton_Click);
             // 
             // ForthButton
             // 
@@ -144,6 +147,7 @@ namespace gui
             this.ForthButton.Name = "ForthButton";
             this.ForthButton.Size = new System.Drawing.Size(36, 30);
             this.ForthButton.TabIndex = 6;
+            this.ForthButton.TabStop = false;
             this.ForthButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.ForthButton.UseVisualStyleBackColor = false;
             this.ForthButton.Click += new System.EventHandler(this.ForthButton_Click);
@@ -278,15 +282,57 @@ namespace gui
             this.EndXLabel.TabIndex = 17;
             this.EndXLabel.Text = "X:";
             // 
-            // panel1
+            // Panel
             // 
-            this.panel1.AutoScroll = true;
-            this.panel1.BackColor = System.Drawing.Color.Cornsilk;
-            this.panel1.Controls.Add(this.ImageBox);
-            this.panel1.Location = new System.Drawing.Point(4, 3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(866, 644);
-            this.panel1.TabIndex = 22;
+            this.Panel.AutoScroll = true;
+            this.Panel.BackColor = System.Drawing.Color.Cornsilk;
+            this.Panel.Controls.Add(this.ImageBox);
+            this.Panel.Location = new System.Drawing.Point(4, 3);
+            this.Panel.Name = "Panel";
+            this.Panel.Size = new System.Drawing.Size(866, 644);
+            this.Panel.TabIndex = 22;
+            // 
+            // ColorBox
+            // 
+            this.ColorBox.AllowDrop = true;
+            this.ColorBox.BackColor = System.Drawing.Color.Cornsilk;
+            this.ColorBox.Location = new System.Drawing.Point(971, 378);
+            this.ColorBox.Name = "ColorBox";
+            this.ColorBox.Size = new System.Drawing.Size(158, 23);
+            this.ColorBox.TabIndex = 23;
+            this.ColorBox.TabStop = false;
+            this.ColorBox.Text = "#FFFFFF";
+            this.ColorBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.ColorBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ColorBox_KeyPress);
+            // 
+            // ColorButton
+            // 
+            this.ColorButton.BackColor = System.Drawing.Color.White;
+            this.ColorButton.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.ColorButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ColorButton.ForeColor = System.Drawing.SystemColors.Window;
+            this.ColorButton.Location = new System.Drawing.Point(1058, 407);
+            this.ColorButton.Name = "ColorButton";
+            this.ColorButton.Size = new System.Drawing.Size(45, 37);
+            this.ColorButton.TabIndex = 24;
+            this.ColorButton.TabStop = false;
+            this.ColorButton.UseVisualStyleBackColor = false;
+            this.ColorButton.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ColorButton_MouseClick);
+            // 
+            // PipetteButton
+            // 
+            this.PipetteButton.BackColor = System.Drawing.Color.Cornsilk;
+            this.PipetteButton.Enabled = false;
+            this.PipetteButton.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.PipetteButton.ForeColor = System.Drawing.SystemColors.Window;
+            this.PipetteButton.Image = global::gui.Properties.Resources.Pipette;
+            this.PipetteButton.Location = new System.Drawing.Point(993, 407);
+            this.PipetteButton.Name = "PipetteButton";
+            this.PipetteButton.Size = new System.Drawing.Size(45, 37);
+            this.PipetteButton.TabIndex = 25;
+            this.PipetteButton.TabStop = false;
+            this.PipetteButton.UseVisualStyleBackColor = false;
+            this.PipetteButton.Click += new System.EventHandler(this.PipetteButton_Click);
             // 
             // MainWindow
             // 
@@ -297,7 +343,10 @@ namespace gui
             this.BackColor = System.Drawing.Color.White;
             this.BackgroundImage = global::gui.Properties.Resources.Background;
             this.ClientSize = new System.Drawing.Size(1208, 650);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.PipetteButton);
+            this.Controls.Add(this.ColorButton);
+            this.Controls.Add(this.ColorBox);
+            this.Controls.Add(this.Panel);
             this.Controls.Add(this.EndLabel);
             this.Controls.Add(this.EndYBox);
             this.Controls.Add(this.EndXBox);
@@ -324,9 +373,10 @@ namespace gui
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainWindow";
             this.Text = "Shut-Your-Bubble";
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MainWindow_MouseClick);
             ((System.ComponentModel.ISupportInitialize)(this.ImageBox)).EndInit();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.Panel.ResumeLayout(false);
+            this.Panel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -356,7 +406,10 @@ namespace gui
         private System.Windows.Forms.TextBox EndXBox;
         private System.Windows.Forms.Label EndYLabel;
         private System.Windows.Forms.Label EndXLabel;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel Panel;
+        private System.Windows.Forms.TextBox ColorBox;
+        private System.Windows.Forms.Button ColorButton;
+        private System.Windows.Forms.Button PipetteButton;
     }
 }
 
