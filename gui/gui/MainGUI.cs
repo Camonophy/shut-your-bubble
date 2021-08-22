@@ -2,7 +2,6 @@
 using System.IO;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace gui
@@ -11,10 +10,10 @@ namespace gui
     {
 
         // Path to several copies of the image
-        private readonly string CACHEPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"\..\..\Resources\Cache\";
+        private readonly string CACHEPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../Resources/Cache/";
 
         // Path to the Python-Script to remove the text in an image
-        private readonly string SCRIPTPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"\..\..\..\..\src\Textinguisher.py";
+        private readonly string SCRIPTPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../../../src/Textinguisher.py";
 
         // Bitmap to figure out the color of a specific pixel in read-color-mode
         private Bitmap bmp;
