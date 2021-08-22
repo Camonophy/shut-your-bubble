@@ -9,25 +9,19 @@ namespace gui
     public partial class MainWindow : Form
     {
 
-        // Path to several copies of the image
         private readonly string CACHEPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../Resources/Cache/";
-
-        // Path to the Python-Script to remove the text in an image
         private readonly string SCRIPTPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../../../src/Textinguisher.py";
+        private string imagePath;
+        private string imageName;
 
-        // Bitmap to figure out the color of a specific pixel in read-color-mode
         private Bitmap bmp;
 
-        // Directory of the image backup files
         private DirectoryInfo cachDirectory;
 
-        // Color dialog window to change the color of the replacing rectangles
-        private ColorDialog CDialog = new ColorDialog();
+        private ColorDialog colDialog = new ColorDialog();
 
-        // Used to manage through back and forth option
         private int index, stepCount = 0;
 
-        // Map the installed Tesseract languages to their full notation
         System.Collections.Generic.Dictionary<string, string> languages = 
             new System.Collections.Generic.Dictionary<string, string>(){
 	            {"chi_sim",      "Chinese (Simplified)"},
@@ -45,12 +39,7 @@ namespace gui
                 {"spa",          "Spanish"}
             };
 
-        // Original image path and name
-        private string path;
-        private string fileName;
-
-        // Distinguish between "the user wants wo pick a color from an image" or "the user wants to remove text from an image"
-        private bool readColorMode = false;
+        private bool pickColorMode = false;
 
 
         public MainWindow()
@@ -74,39 +63,36 @@ namespace gui
         }
 
 
-        /**
-         * If the user wants to undo his the last actions, load the previous image
-         * from the Cache folder
-         */
+        /// <summary>
+        /// Undo the last actions taken and load the previous image
+        /// from the Cache folder.
+        /// </summary>
         private void BackButton_Click(object sender, EventArgs e)
         {
             this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
+            this.pickColorMode = false;
 
             if (this.index > 0 && this.ImageBox.Image != null) 
             {
-                //////// Not sure abt these paths ///////
                 try
                 {
-                    this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + --this.index);
-                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
+                    this.ImageBox.Load(this.CACHEPATH + --this.index);
+                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.imageName, true);
                 } catch(FileNotFoundException) { } // No file is loaded and therefore can not be replaced by another one
             }
         }
 
-        /**
-         * Convert a color into a string, that represents the corresponding hex value
-         */
+
         private String Color_To_Hex(Color actColor)
         {
             return "#" + actColor.R.ToString("X2") + actColor.G.ToString("X2") + actColor.B.ToString("X2");
         }
 
 
-        /**
-         * Try to read the content of the ColorBox, convert the hex number into
-         * an actual color if possible and show the color on the ColorButton.
-         */
+        /// <summary>
+        /// Read the content of the ColorBox, convert the hex number into
+        /// a color and show it on the ColorButton.
+        /// </summary>
         private void ColorBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             try
@@ -120,49 +106,45 @@ namespace gui
         }
 
 
-        /**
-         * Open a color dialog, where the user can choose between various default
-         * colors to change the one that will be used to fill the next rectangle
-         */
+        /// <summary>
+        /// Open a color dialog to change the color of the
+        /// painted rectangle.
+        /// </summary>
         private void ColorButton_MouseClick(object sender, MouseEventArgs e)
         {
             this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
+            this.pickColorMode = false;
 
             // Sets the initial color select to the current text color.
-            this.CDialog.Color = this.ColorButton.ForeColor;
+            this.colDialog.Color = this.ColorButton.ForeColor;
 
             // Update the text box color if the user clicks OK 
-            if (this.CDialog.ShowDialog() == DialogResult.OK)
-                this.ColorButton.BackColor = this.CDialog.Color;
+            if (this.colDialog.ShowDialog() == DialogResult.OK)
+                this.ColorButton.BackColor = this.colDialog.Color;
                 this.ColorBox.Text = Color_To_Hex(this.ColorButton.BackColor);
         }
 
 
-        /**
-         * If the user wants to redo one of his lasta ctions, load his next image
-         * from the Cache folder
-         */
+        /// <summary>
+        /// Redo one step by loading the next image from the cache folder.
+        /// </summary>
         private void ForthButton_Click(object sender, EventArgs e)
         {
             this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
+            this.pickColorMode = false;
 
             if (this.index != this.stepCount && this.ImageBox.Image != null)
             {
                 try
                 {
-                    this.ImageBox.Load(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\..\Resources\Cache\" + ++this.index);
-                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.fileName, true);
+                    this.ImageBox.Load(this.CACHEPATH + ++this.index);
+                    System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.imageName, true);
                 }
                 catch (FileNotFoundException) { } // No file is loaded and therefore can not be replaced by another one
             }
         }
 
 
-        /**
-        * Ask Tesseract for all available languages that has been installed
-        */
         private String[] Get_Installed_Tessarect_Languages()
         {
             String[] languages = new string[] { };
@@ -192,13 +174,13 @@ namespace gui
         }
 
 
-        /**
-         * Get the X and Y coordinates as the top left corner of the rectangle, in which 
-         * the user wants remove the text.
-         */
+        /// <summary>
+        /// Track the X and Y coordinates in the ImageBox when the mouse button
+        /// is pressed.
+        /// </summary>
         private void ImageBox_MouseDown(object sender, MouseEventArgs e)
         {
-            if (!this.readColorMode)
+            if (!this.pickColorMode)
             {
                 this.StartXBox.Text = e.X.ToString();
                 this.StartYBox.Text = e.Y.ToString();
@@ -206,9 +188,10 @@ namespace gui
         }
 
 
-        /**
-         * Coordinates of the current mouse position in the ImageBox
-         */
+        /// <summary>
+        /// Track the X and Y coordinates in the ImageBox when the mouse
+        /// is moved.
+        /// </summary>
         private void ImageBox_MouseMove(object sender, MouseEventArgs e)
         {
             this.CurrentXBox.Text = e.X.ToString();
@@ -216,16 +199,16 @@ namespace gui
         }
 
 
-        /**
-         * Get the X and Y coordinates as the bottom right corner of the rectangle, in which 
-         * the user wants remove the text.
-         * 
-         * Safe a copy of the current image in the gui/gui/Resources/Cache/ folder, 
-         * process the image with the Python-Script and show the new image in the ImageBox
-         */
+        /// <summary>        
+        /// Track the X and Y coordinates in the ImageBox when the mouse button
+        /// is released.
+        /// 
+        /// Save an image backup, run the Python script on the defined area in the image
+        /// and load the new image into the ImageBox.
+        /// </summary>
         private void ImageBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if(!this.readColorMode)
+            if(!this.pickColorMode)
             {
                 this.ImageBox.Cursor    = System.Windows.Forms.Cursors.WaitCursor;
                 this.ImageBox.Enabled   = false;
@@ -260,7 +243,7 @@ namespace gui
                                                  int.Parse(this.EndYBox.Text.ToString()) - int.Parse(this.StartYBox.Text.ToString()),
                                                  this.ColorBox.Text,
                                                  this.languages.FirstOrDefault(x => x.Value == this.LanguageSelect.Text).Key,
-                                                 this.CACHEPATH + this.fileName);
+                                                 this.CACHEPATH + this.imageName);
                 start.UseShellExecute        = false;
                 start.CreateNoWindow         = true; 
                 start.RedirectStandardOutput = true;
@@ -278,9 +261,9 @@ namespace gui
                 }
 
                 // Load the Python output file
-                this.ImageBox.Image = Load_BitMap(this.CACHEPATH + this.fileName);
+                this.ImageBox.Image = Load_BitMap(this.CACHEPATH + this.imageName);
 
-                // Safe the new picture as a backup copy
+                // Save the new picture as a backup copy
                 try
                 {
                     Image image = this.ImageBox.Image;
@@ -295,15 +278,11 @@ namespace gui
                 this.ColorBox.Text = Color_To_Hex(pixelColor);
                 this.ColorButton.BackColor = pixelColor;
                 this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-                this.readColorMode = false;
+                this.pickColorMode = false;
             }
         }
+        
 
-
-        /**
-         * Create a copy of the original file as bitmap, in order to open the original 
-         * with Python and C#. (Permission errors would arise otherwise) 
-         */
         private Bitmap Load_BitMap(string path)
         {
             if (File.Exists(path))
@@ -321,14 +300,13 @@ namespace gui
         }
 
 
-        /**
-         * Clear the Cache directory and load an image from the 
-         * file dialog into the ImageBox
-         */
+        /// <summary>        
+        /// Load an image from file dialog into the ImageBox.
+        /// </summary>
         private void Load_Click(object sender, EventArgs e)
         {
             this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
-            this.readColorMode      = false;
+            this.pickColorMode      = false;
             this.ImageBox.Enabled   = false;
             this.SaveButton.Enabled = false;
             foreach (FileInfo file in cachDirectory.GetFiles())
@@ -343,21 +321,21 @@ namespace gui
             findImageDialog.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png";
             findImageDialog.FilterIndex = 3;
             findImageDialog.ShowDialog();
-            this.path     = findImageDialog.FileName.ToString();
-            this.fileName = findImageDialog.SafeFileName.ToString();
+            this.imagePath     = findImageDialog.FileName.ToString();
+            this.imageName = findImageDialog.SafeFileName.ToString();
             try
             {
-                System.IO.File.Copy(this.path, this.CACHEPATH + this.fileName, true);
-                this.bmp = Load_BitMap(this.CACHEPATH + this.fileName);
+                System.IO.File.Copy(this.imagePath, this.CACHEPATH + this.imageName, true);
+                this.bmp = Load_BitMap(this.CACHEPATH + this.imageName);
                 this.ImageBox.Image = bmp;
-                this.PathBox.Text   = this.path;
+                this.PathBox.Text   = this.imagePath;
                 Image image = this.ImageBox.Image;
                 image.Save(Path.Combine(this.CACHEPATH, "0"));
                 this.SaveButton.Enabled    = true;
                 this.ImageBox.Enabled      = true;
                 this.PipetteButton.Enabled = true;
             } catch(Exception) {
-                // File dialog is closed and therefore no file is loaded
+                // File dialog is closed, hence no file is loaded
                 this.SaveButton.Enabled = true;
                 this.ImageBox.Enabled = true;
                 this.PipetteButton.Enabled = true;
@@ -365,39 +343,38 @@ namespace gui
         }
 
 
-        /**
-         * Cancel the color pick mode.
-         */
+        /// <summary>        
+        /// Cancel the color pick mode.
+        /// </summary>
         private void MainWindow_MouseClick(object sender, MouseEventArgs e)
         {
             this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
+            this.pickColorMode = false;
         }
 
 
-        /**
-         * Activate the color pick mode, where the user can click on a pixel in the image,
-         * read its RGB values and use this color to determine the color of the rectangle, 
-         * which will cover the texts in the image.
-         */
+        /// <summary>        
+        /// Activate the color pick mode.
+        /// 
+        /// Load the RGB value of pixel into the color elements in the GUI.
+        /// </summary>
         private void PipetteButton_Click(object sender, EventArgs e)
         {
-            if(this.readColorMode)
+            if(this.pickColorMode)
             {
                 this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-                this.readColorMode = false;
+                this.pickColorMode = false;
             } else {
                 this.ImageBox.Cursor = System.Windows.Forms.Cursors.Cross;
-                this.readColorMode = true;
+                this.pickColorMode = true;
             }
         }
 
 
-        /**
-         * The user has 100 backup copies available to turn back to.
-         * If 100 copies are reached, the 0th get deleted, image copies 1-100
-         * are taking the position of their previous copy and image 100 can be saved.
-         */
+        /// <summary>        
+        /// After 100 backup copies, file 0 gets deleted, the remaining files are getting
+        /// pulled down by one position and the new file takes the position 100.
+        /// </summary>
         private void Renumerade_Files()
         {
             try
@@ -410,13 +387,13 @@ namespace gui
         }
 
 
-        /**
-         * Safe the image from the Imagebox with the file dialog 
-         */
+        /// <summary>        
+        /// Bring up the save file dialog to save the file from the ImageBox.
+        /// </summary>
         private void SaveButton_Click(object sender, EventArgs e)
         {
             this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.readColorMode = false;
+            this.pickColorMode = false;
             SaveFileDialog saveImageDialog = new SaveFileDialog();
             saveImageDialog.Title  = "Save the image";
             saveImageDialog.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png";
