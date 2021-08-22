@@ -356,7 +356,7 @@ namespace gui
         /// <summary>        
         /// Activate the color pick mode.
         /// 
-        /// Load the RGB value of pixel into the color elements in the GUI.
+        /// Load the RGB value of a pixel into the color related elements in the GUI.
         /// </summary>
         private void PipetteButton_Click(object sender, EventArgs e)
         {
