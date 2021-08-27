@@ -9,7 +9,7 @@ namespace gui
     public partial class MainWindow : Form
     {
 
-        private readonly string CACHEPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../Resources/Cache/";
+        private readonly string CACHEPATH  = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../Resources/Cache/";
         private readonly string SCRIPTPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../../../src/Textinguisher.py";
         private string imagePath;
         private string imageName;
@@ -336,9 +336,12 @@ namespace gui
                 this.PipetteButton.Enabled = true;
             } catch(Exception) {
                 // File dialog is closed, hence no file is loaded
-                this.SaveButton.Enabled = true;
-                this.ImageBox.Enabled = true;
-                this.PipetteButton.Enabled = true;
+                if(this.ImageBox.Image != null)
+                {
+                    this.SaveButton.Enabled = true;
+                    this.ImageBox.Enabled = true;
+                    this.PipetteButton.Enabled = true;
+                }
             }
         }
 
