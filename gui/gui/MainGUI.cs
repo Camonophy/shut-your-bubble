@@ -9,10 +9,10 @@ namespace gui
     public partial class MainWindow : Form
     {
 
-        private readonly string CACHEPATH  = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../Resources/Cache/";
-        private readonly string SCRIPTPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../../../src/Textinguisher.py";
-        private string imagePath;
-        private string imageName;
+        private readonly String CACHEPATH  = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../Resources/Cache/";
+        private readonly String SCRIPTPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../../../src/Textinguisher.py";
+        private String imagePath;
+        private String imageName;
 
         private Bitmap bmp;
 
@@ -22,8 +22,8 @@ namespace gui
 
         private int index, stepCount = 0;
 
-        System.Collections.Generic.Dictionary<string, string> languages = 
-            new System.Collections.Generic.Dictionary<string, string>(){
+        System.Collections.Generic.Dictionary<String, String> languages = 
+            new System.Collections.Generic.Dictionary<String, String>(){
 	            {"chi_sim",      "Chinese (Simplified)"},
                 {"chi_sim_vert", "Chinese Vertical (Simplified)"},
                 {"chi_tra",      "Chinese (Traditional)"},
@@ -76,7 +76,8 @@ namespace gui
             {
                 try
                 {
-                    this.ImageBox.Load(this.CACHEPATH + --this.index);
+                    this.bmp = Load_BitMap(this.CACHEPATH + --this.index);
+                    this.ImageBox.Image = this.bmp;
                     System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.imageName, true);
                 } catch(FileNotFoundException) { } // No file is loaded and therefore can not be replaced by another one
             }
@@ -137,7 +138,8 @@ namespace gui
             {
                 try
                 {
-                    this.ImageBox.Load(this.CACHEPATH + ++this.index);
+                    this.bmp = Load_BitMap(this.CACHEPATH + ++this.index);
+                    this.ImageBox.Image = this.bmp;
                     System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.imageName, true);
                 }
                 catch (FileNotFoundException) { } // No file is loaded and therefore can not be replaced by another one
@@ -147,7 +149,7 @@ namespace gui
 
         private String[] Get_Installed_Tessarect_Languages()
         {
-            String[] languages = new string[] { };
+            String[] languages = new String[] { };
 
             System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
             start.FileName = "python";
@@ -161,8 +163,10 @@ namespace gui
             {
                 using (StreamReader reader = process.StandardOutput)
                 {
-                    string stderr = process.StandardError.ReadToEnd();
-                    string result = reader.ReadToEnd();
+                    String stderr = process.StandardError.ReadToEnd();
+                    String result = reader.ReadToEnd();
+                    Console.Write(stderr == "" ? "" : stderr + "\n");
+                    Console.Write(result == "" ? "" : result + "\n");
                     languages = result.Substring(2, result.Length - 5)
                                       .Replace(" ", "")
                                       .Replace("\'", "")
@@ -235,12 +239,14 @@ namespace gui
                 // Run the Python-Script
                 System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
                 start.FileName  = "python";
+                int[] xVals = new int[2] { int.Parse(this.StartXBox.Text.ToString()), int.Parse(this.EndXBox.Text.ToString()) };
+                int[] yVals = new int[2] { int.Parse(this.StartYBox.Text.ToString()), int.Parse(this.EndYBox.Text.ToString()) };
                 start.Arguments = this.SCRIPTPATH +                              
                                   String.Format(" {0} {1} {2} {3} {4} {5} {6} ", 
-                                                 int.Parse(this.StartXBox.Text.ToString()),
-                                                 int.Parse(this.StartYBox.Text.ToString()), 
-                                                 int.Parse(this.EndXBox.Text.ToString()) - int.Parse(this.StartXBox.Text.ToString()),
-                                                 int.Parse(this.EndYBox.Text.ToString()) - int.Parse(this.StartYBox.Text.ToString()),
+                                                 xVals.Min(),
+                                                 yVals.Min(), 
+                                                 xVals.Max() - xVals.Min(),
+                                                 yVals.Max() - yVals.Min(),
                                                  this.ColorBox.Text,
                                                  this.languages.FirstOrDefault(x => x.Value == this.LanguageSelect.Text).Key,
                                                  this.CACHEPATH + this.imageName);
@@ -253,10 +259,10 @@ namespace gui
                 {
                     using (StreamReader reader = process.StandardOutput)
                     {
-                        string stderr = process.StandardError.ReadToEnd(); 
-                        string result = reader.ReadToEnd(); 
-                        Console.WriteLine(stderr);
-                        Console.WriteLine(result);
+                        String stderr = process.StandardError.ReadToEnd(); 
+                        String result = reader.ReadToEnd(); 
+                        Console.Write(stderr == "" ? "" : stderr + "\n");
+                        Console.Write(result == "" ? "" : result + "\n");
                     }
                 }
 
@@ -268,13 +274,14 @@ namespace gui
                 {
                     Image image = this.ImageBox.Image;
                     image.Save(this.CACHEPATH + this.stepCount);
+
                 } catch (NullReferenceException) { } // No image is loaded and therefore no image can be saved
 
                 this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
                 this.ImageBox.Enabled   = true;
                 this.SaveButton.Enabled = true;
             } else {
-                Color pixelColor = bmp.GetPixel(e.X, e.Y);
+                Color pixelColor   = this.bmp.GetPixel(e.X, e.Y);
                 this.ColorBox.Text = Color_To_Hex(pixelColor);
                 this.ColorButton.BackColor = pixelColor;
                 this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
@@ -283,7 +290,7 @@ namespace gui
         }
         
 
-        private Bitmap Load_BitMap(string path)
+        private Bitmap Load_BitMap(String path)
         {
             if (File.Exists(path))
             {
@@ -294,7 +301,6 @@ namespace gui
                     return new Bitmap(memoryStream);
                 }
             } else {
-                this.PathBox.Text = "Error: No file loaded";
                 return null;
             }
         }
@@ -309,37 +315,51 @@ namespace gui
             this.pickColorMode      = false;
             this.ImageBox.Enabled   = false;
             this.SaveButton.Enabled = false;
-            foreach (FileInfo file in cachDirectory.GetFiles())
-            {
-                try { file.Delete();  } 
-                catch (IOException) { } // This file is still open
-
-            }
 
             OpenFileDialog findImageDialog = new OpenFileDialog();
             findImageDialog.Title  = "Please select an image";
             findImageDialog.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png";
             findImageDialog.FilterIndex = 3;
             findImageDialog.ShowDialog();
-            this.imagePath     = findImageDialog.FileName.ToString();
-            this.imageName = findImageDialog.SafeFileName.ToString();
+            String path     = findImageDialog.FileName.ToString();
+            String name     = findImageDialog.SafeFileName.ToString();
+            Bitmap newImage = Load_BitMap(path);
+
+            if (newImage == null)
+            {
+                this.SaveButton.Enabled = true;
+                this.ImageBox.Enabled = true;
+                this.PipetteButton.Enabled = true;
+                return;
+            }
+
             try
             {
-                System.IO.File.Copy(this.imagePath, this.CACHEPATH + this.imageName, true);
-                this.bmp = Load_BitMap(this.CACHEPATH + this.imageName);
-                this.ImageBox.Image = bmp;
+                foreach (FileInfo file in cachDirectory.GetFiles())
+                {
+                    try { file.Delete(); }
+                    catch (IOException) { } // This file is still opened somewhere
+                }
+                this.imagePath = path;
+                this.imageName = name;
+                this.bmp = newImage;
+                this.ImageBox.Image = this.bmp;
                 this.PathBox.Text   = this.imagePath;
                 Image image = this.ImageBox.Image;
                 image.Save(Path.Combine(this.CACHEPATH, "0"));
                 this.SaveButton.Enabled    = true;
                 this.ImageBox.Enabled      = true;
                 this.PipetteButton.Enabled = true;
+                this.stepCount             = 0;
+                this.index                 = 0;
+                System.IO.File.Copy(this.imagePath, this.CACHEPATH + this.imageName, true);
+
             } catch(Exception) {
                 // File dialog is closed, hence no file is loaded
                 if(this.ImageBox.Image != null)
                 {
-                    this.SaveButton.Enabled = true;
-                    this.ImageBox.Enabled = true;
+                    this.SaveButton.Enabled    = true;
+                    this.ImageBox.Enabled      = true;
                     this.PipetteButton.Enabled = true;
                 }
             }
