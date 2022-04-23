@@ -3,7 +3,7 @@
 
 ## Description
 
-Remove text from speech bubbles in comics, cartoons, manga or similar graphical mediums to support fan translations.
+Remove text from speech bubbles in comics, cartoons, manga or similar graphical media to support fan translations.
 
    
 ## Dependencies
