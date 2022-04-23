@@ -8,7 +8,6 @@ namespace gui
 {
     public partial class MainWindow : Form
     {
-
         private readonly String CACHEPATH  = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../Resources/Cache/";
         private readonly String SCRIPTPATH = AppDomain.CurrentDomain.BaseDirectory.ToString() + @"../../../../src/Textinguisher.py";
         private String imagePath;
@@ -79,8 +78,12 @@ namespace gui
                     this.bmp = Load_BitMap(this.CACHEPATH + --this.index);
                     this.ImageBox.Image = this.bmp;
                     System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.imageName, true);
+                    this.ForthButton.Enabled = true;
                 } catch(FileNotFoundException) { } // No file is loaded and therefore can not be replaced by another one
             }
+
+            // There is yet another image to load 
+            this.BackButton.Enabled = System.IO.File.Exists(this.CACHEPATH + (this.index - 1));
         }
 
 
@@ -141,9 +144,14 @@ namespace gui
                     this.bmp = Load_BitMap(this.CACHEPATH + ++this.index);
                     this.ImageBox.Image = this.bmp;
                     System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.imageName, true);
+                    this.BackButton.Enabled = true;
                 }
                 catch (FileNotFoundException) { } // No file is loaded and therefore can not be replaced by another one
             }
+
+            // There is yet another image to load 
+            this.ForthButton.Enabled = System.IO.File.Exists(this.CACHEPATH + (this.index + 1));
+
         }
 
 
@@ -212,11 +220,13 @@ namespace gui
         /// </summary>
         private void ImageBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if(!this.pickColorMode)
+            if (!this.pickColorMode)
             {
                 this.ImageBox.Cursor    = System.Windows.Forms.Cursors.WaitCursor;
                 this.ImageBox.Enabled   = false;
                 this.SaveButton.Enabled = false;
+                this.ForthButton.Enabled = false;
+                this.BackButton.Enabled = false;
                 this.EndXBox.Text       = e.X.ToString();
                 this.EndYBox.Text       = e.Y.ToString();
 
@@ -280,6 +290,7 @@ namespace gui
                 this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
                 this.ImageBox.Enabled   = true;
                 this.SaveButton.Enabled = true;
+                this.BackButton.Enabled = true;
             } else {
                 Color pixelColor   = this.bmp.GetPixel(e.X, e.Y);
                 this.ColorBox.Text = Color_To_Hex(pixelColor);
@@ -312,9 +323,14 @@ namespace gui
         private void Load_Click(object sender, EventArgs e)
         {
             this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
+            bool forth = this.ForthButton.Enabled;
+            bool back = this.BackButton.Enabled;
+
             this.pickColorMode      = false;
             this.ImageBox.Enabled   = false;
             this.SaveButton.Enabled = false;
+            this.ForthButton.Enabled = false;
+            this.BackButton.Enabled = false;
 
             OpenFileDialog findImageDialog = new OpenFileDialog();
             findImageDialog.Title  = "Please select an image";
@@ -356,11 +372,13 @@ namespace gui
 
             } catch(Exception) {
                 // File dialog is closed, hence no file is loaded
-                if(this.ImageBox.Image != null)
+                if (this.ImageBox.Image != null)
                 {
                     this.SaveButton.Enabled    = true;
                     this.ImageBox.Enabled      = true;
                     this.PipetteButton.Enabled = true;
+                    this.ForthButton.Enabled   = forth;
+                    this.BackButton.Enabled    = back;
                 }
             }
         }

@@ -128,6 +128,7 @@ namespace gui
             // 
             this.BackButton.BackColor = System.Drawing.Color.Cornsilk;
             this.BackButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BackButton.Enabled = false;
             this.BackButton.Image = global::gui.Properties.Resources.Back;
             this.BackButton.Location = new System.Drawing.Point(876, 6);
             this.BackButton.Name = "BackButton";
@@ -142,6 +143,7 @@ namespace gui
             // 
             this.ForthButton.BackColor = System.Drawing.Color.Cornsilk;
             this.ForthButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ForthButton.Enabled = false;
             this.ForthButton.Image = global::gui.Properties.Resources.Forth;
             this.ForthButton.Location = new System.Drawing.Point(928, 6);
             this.ForthButton.Name = "ForthButton";
