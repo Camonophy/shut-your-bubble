@@ -13,13 +13,17 @@ namespace gui
         private String imagePath;
         private String imageName;
 
+        private int originalHeight, originalWidth = 0;
+        private int index, stepCount = 0;
+
+        private double zoom = 1.0;
+
         private Bitmap bmp;
 
         private DirectoryInfo cachDirectory;
 
         private ColorDialog colDialog = new ColorDialog();
 
-        private int index, stepCount = 0;
 
         System.Collections.Generic.Dictionary<String, String> languages = 
             new System.Collections.Generic.Dictionary<String, String>(){
@@ -68,8 +72,10 @@ namespace gui
         /// </summary>
         private void BackButton_Click(object sender, EventArgs e)
         {
-            this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.pickColorMode = false;
+            this.ImageBox.Cursor    = System.Windows.Forms.Cursors.Default;
+            this.pickColorMode      = false;
+            this.ZoomIn.Enabled     = false;
+            this.ZoomOut.Enabled    = false;
 
             if (this.index > 0 && this.ImageBox.Image != null) 
             {
@@ -84,6 +90,8 @@ namespace gui
 
             // There is yet another image to load 
             this.BackButton.Enabled = System.IO.File.Exists(this.CACHEPATH + (this.index - 1));
+            this.ZoomIn.Enabled     = !(this.zoom == 1.5);
+            this.ZoomOut.Enabled    = !(this.zoom == 0.5);
         }
 
 
@@ -135,7 +143,9 @@ namespace gui
         private void ForthButton_Click(object sender, EventArgs e)
         {
             this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.pickColorMode = false;
+            this.pickColorMode      = false;
+            this.ZoomIn.Enabled     = false;
+            this.ZoomOut.Enabled    = false;
 
             if (this.index != this.stepCount && this.ImageBox.Image != null)
             {
@@ -151,6 +161,8 @@ namespace gui
 
             // There is yet another image to load 
             this.ForthButton.Enabled = System.IO.File.Exists(this.CACHEPATH + (this.index + 1));
+            this.ZoomIn.Enabled     = !(this.zoom == 1.5);
+            this.ZoomOut.Enabled    = !(this.zoom == 0.5);
 
         }
 
@@ -253,10 +265,10 @@ namespace gui
                 int[] yVals = new int[2] { int.Parse(this.StartYBox.Text.ToString()), int.Parse(this.EndYBox.Text.ToString()) };
                 start.Arguments = this.SCRIPTPATH +                              
                                   String.Format(" {0} {1} {2} {3} {4} {5} {6} ", 
-                                                 xVals.Min(),
-                                                 yVals.Min(), 
-                                                 xVals.Max() - xVals.Min(),
-                                                 yVals.Max() - yVals.Min(),
+                                                 (int) (xVals.Min() / this.zoom),
+                                                 (int) (yVals.Min() / this.zoom),
+                                                 (int) ((xVals.Max() - xVals.Min()) / this.zoom),
+                                                 (int) ((yVals.Max() - yVals.Min()) / this.zoom),
                                                  this.ColorBox.Text,
                                                  this.languages.FirstOrDefault(x => x.Value == this.LanguageSelect.Text).Key,
                                                  this.CACHEPATH + this.imageName);
@@ -309,7 +321,8 @@ namespace gui
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
                     var memoryStream = new MemoryStream(reader.ReadBytes((int)stream.Length));
-                    return new Bitmap(memoryStream);
+                    Bitmap bit = new Bitmap(memoryStream);
+                    return new Bitmap(bit, new Size((int) (bit.Width * this.zoom) , (int) (bit.Height * this.zoom)));
                 }
             } else {
                 return null;
@@ -356,18 +369,22 @@ namespace gui
                     try { file.Delete(); }
                     catch (IOException) { } // This file is still opened somewhere
                 }
-                this.imagePath = path;
-                this.imageName = name;
-                this.bmp = newImage;
-                this.ImageBox.Image = this.bmp;
-                this.PathBox.Text   = this.imagePath;
-                Image image = this.ImageBox.Image;
+                this.imagePath              = path;
+                this.imageName              = name;
+                this.bmp                    = newImage;
+                this.ImageBox.Image         = this.bmp;
+                this.PathBox.Text           = this.imagePath;
+                Image image                 = this.ImageBox.Image;
                 image.Save(Path.Combine(this.CACHEPATH, "0"));
-                this.SaveButton.Enabled    = true;
-                this.ImageBox.Enabled      = true;
-                this.PipetteButton.Enabled = true;
-                this.stepCount             = 0;
-                this.index                 = 0;
+                this.SaveButton.Enabled     = true;
+                this.ImageBox.Enabled       = true;
+                this.PipetteButton.Enabled  = true;
+                this.ZoomIn.Enabled         = true;
+                this.ZoomOut.Enabled        = true;
+                this.stepCount              = 0;
+                this.index                  = 0;
+                this.originalHeight         = image.Height;
+                this.originalWidth          = image.Width;
                 System.IO.File.Copy(this.imagePath, this.CACHEPATH + this.imageName, true);
 
             } catch(Exception) {
@@ -428,6 +445,7 @@ namespace gui
         }
 
 
+
         /// <summary>        
         /// Bring up the save file dialog to save the file from the ImageBox.
         /// </summary>
@@ -436,7 +454,7 @@ namespace gui
             this.ImageBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.pickColorMode = false;
             SaveFileDialog saveImageDialog = new SaveFileDialog();
-            saveImageDialog.Title  = "Save the image";
+            saveImageDialog.Title = "Save the image";
             saveImageDialog.Filter = "Bitmap (*.bmp)|*.bmp|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png";
             saveImageDialog.FilterIndex = 3;
             saveImageDialog.ShowDialog();
@@ -464,6 +482,34 @@ namespace gui
                 }
                 fs.Close();
             }
+        }
+
+        private void ZoomIn_Click(object sender, EventArgs e)
+        {
+            this.ForthButton.Enabled    = false;
+            this.BackButton.Enabled     = false;
+            this.zoom += 0.1;
+            this.ImageBox.Image = new Bitmap(new Bitmap(this.CACHEPATH + this.imageName), new Size((int)(this.originalWidth * this.zoom), (int)(this.originalHeight * this.zoom)));
+
+            this.ZoomIn.Enabled  = !(this.zoom >= 1.5);
+            this.ZoomOut.Enabled = true;
+
+            this.BackButton.Enabled     = System.IO.File.Exists(this.CACHEPATH + (this.index - 1));
+            this.ForthButton.Enabled    = System.IO.File.Exists(this.CACHEPATH + (this.index + 1));
+        }
+
+        private void ZoomOut_Click(object sender, EventArgs e)
+        {
+            this.ForthButton.Enabled    = false;
+            this.BackButton.Enabled     = false;
+            this.zoom -= 0.1;
+            this.ImageBox.Image = new Bitmap(new Bitmap(this.CACHEPATH + this.imageName), new Size((int)(this.originalWidth * this.zoom), (int)(this.originalHeight * this.zoom)));
+
+            this.ZoomOut.Enabled = !(this.zoom <= 0.5);
+            this.ZoomIn.Enabled  = true;
+
+            this.BackButton.Enabled     = System.IO.File.Exists(this.CACHEPATH + (this.index - 1));
+            this.ForthButton.Enabled    = System.IO.File.Exists(this.CACHEPATH + (this.index + 1));
         }
     }
 }

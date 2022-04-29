@@ -56,6 +56,8 @@ namespace gui
             this.ColorBox = new System.Windows.Forms.TextBox();
             this.ColorButton = new System.Windows.Forms.Button();
             this.PipetteButton = new System.Windows.Forms.Button();
+            this.ZoomIn = new System.Windows.Forms.Button();
+            this.ZoomOut = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ImageBox)).BeginInit();
             this.Panel.SuspendLayout();
             this.SuspendLayout();
@@ -336,6 +338,38 @@ namespace gui
             this.PipetteButton.UseVisualStyleBackColor = false;
             this.PipetteButton.Click += new System.EventHandler(this.PipetteButton_Click);
             // 
+            // ZoomIn
+            // 
+            this.ZoomIn.BackColor = System.Drawing.Color.Cornsilk;
+            this.ZoomIn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ZoomIn.Enabled = false;
+            this.ZoomIn.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ZoomIn.Image = global::gui.Properties.Resources.plus;
+            this.ZoomIn.Location = new System.Drawing.Point(1013, 6);
+            this.ZoomIn.Name = "ZoomIn";
+            this.ZoomIn.Size = new System.Drawing.Size(36, 30);
+            this.ZoomIn.TabIndex = 26;
+            this.ZoomIn.TabStop = false;
+            this.ZoomIn.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.ZoomIn.UseVisualStyleBackColor = false;
+            this.ZoomIn.Click += new System.EventHandler(this.ZoomIn_Click);
+            // 
+            // ZoomOut
+            // 
+            this.ZoomOut.BackColor = System.Drawing.Color.Cornsilk;
+            this.ZoomOut.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ZoomOut.Enabled = false;
+            this.ZoomOut.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ZoomOut.Image = global::gui.Properties.Resources.minus;
+            this.ZoomOut.Location = new System.Drawing.Point(1067, 6);
+            this.ZoomOut.Name = "ZoomOut";
+            this.ZoomOut.Size = new System.Drawing.Size(36, 30);
+            this.ZoomOut.TabIndex = 27;
+            this.ZoomOut.TabStop = false;
+            this.ZoomOut.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.ZoomOut.UseVisualStyleBackColor = false;
+            this.ZoomOut.Click += new System.EventHandler(this.ZoomOut_Click);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 16F);
@@ -345,6 +379,8 @@ namespace gui
             this.BackColor = System.Drawing.Color.White;
             this.BackgroundImage = global::gui.Properties.Resources.Background;
             this.ClientSize = new System.Drawing.Size(1208, 650);
+            this.Controls.Add(this.ZoomOut);
+            this.Controls.Add(this.ZoomIn);
             this.Controls.Add(this.PipetteButton);
             this.Controls.Add(this.ColorButton);
             this.Controls.Add(this.ColorBox);
@@ -412,6 +448,8 @@ namespace gui
         private System.Windows.Forms.TextBox ColorBox;
         private System.Windows.Forms.Button ColorButton;
         private System.Windows.Forms.Button PipetteButton;
+        private System.Windows.Forms.Button ZoomIn;
+        private System.Windows.Forms.Button ZoomOut;
     }
 }
 
