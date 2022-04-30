@@ -81,7 +81,7 @@ namespace gui
             {
                 try
                 {
-                    this.bmp = Load_BitMap(this.CACHEPATH + --this.index);
+                    this.bmp = Load_BitMap(this.CACHEPATH + --this.index, this.zoom);
                     this.ImageBox.Image = this.bmp;
                     System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.imageName, true);
                     this.ForthButton.Enabled = true;
@@ -151,7 +151,7 @@ namespace gui
             {
                 try
                 {
-                    this.bmp = Load_BitMap(this.CACHEPATH + ++this.index);
+                    this.bmp = Load_BitMap(this.CACHEPATH + ++this.index, this.zoom);
                     this.ImageBox.Image = this.bmp;
                     System.IO.File.Copy(this.CACHEPATH + this.index, this.CACHEPATH + this.imageName, true);
                     this.BackButton.Enabled = true;
@@ -289,12 +289,12 @@ namespace gui
                 }
 
                 // Load the Python output file
-                this.ImageBox.Image = Load_BitMap(this.CACHEPATH + this.imageName);
+                this.ImageBox.Image = Load_BitMap(this.CACHEPATH + this.imageName, this.zoom);
 
                 // Save the new picture as a backup copy
                 try
                 {
-                    Image image = this.ImageBox.Image;
+                    Image image = Load_BitMap(this.CACHEPATH + this.imageName);
                     image.Save(this.CACHEPATH + this.stepCount);
 
                 } catch (NullReferenceException) { } // No image is loaded and therefore no image can be saved
@@ -311,9 +311,9 @@ namespace gui
                 this.pickColorMode = false;
             }
         }
-        
 
-        private Bitmap Load_BitMap(String path)
+
+        private Bitmap Load_BitMap(String path, double zoom = 1.0)
         {
             if (File.Exists(path))
             {
@@ -322,7 +322,7 @@ namespace gui
                 {
                     var memoryStream = new MemoryStream(reader.ReadBytes((int)stream.Length));
                     Bitmap bit = new Bitmap(memoryStream);
-                    return new Bitmap(bit, new Size((int) (bit.Width * this.zoom) , (int) (bit.Height * this.zoom)));
+                    return new Bitmap(bit, new Size((int) (bit.Width * zoom) , (int) (bit.Height * zoom)));
                 }
             } else {
                 return null;
@@ -383,9 +383,10 @@ namespace gui
                 this.ZoomOut.Enabled        = true;
                 this.stepCount              = 0;
                 this.index                  = 0;
+                this.zoom                   = 1.0;
                 this.originalHeight         = image.Height;
                 this.originalWidth          = image.Width;
-                System.IO.File.Copy(this.imagePath, this.CACHEPATH + this.imageName, true);
+                System.IO.File.Copy(this.imagePath, this.CACHEPATH + this.imageName, true); 
 
             } catch(Exception) {
                 // File dialog is closed, hence no file is loaded
